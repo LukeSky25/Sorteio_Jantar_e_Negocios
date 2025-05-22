@@ -1,0 +1,14 @@
+nav {
+  background-color: #39396f;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-items: center;
+  justify-content: left;
+}
+
+nav img {
+  width: 190px;
+  height: auto;
+  object-fit: contain;
+}
