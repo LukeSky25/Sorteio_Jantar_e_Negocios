@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-import Header from "./components/Header";
+import logo from "./assets/logo.png";
+import play from "./assets/play.jpg";
+
 import "./style.css";
 
 function App() {
   const [names, setNames] = useState([]);
   const [drawer_n, setDrawer_n] = useState([]);
+  const [quant, setQuant] = useState(1);
 
   useEffect(() => {
     axios
@@ -16,39 +19,43 @@ function App() {
   }, []);
 
   const name_drawer = () => {
-    if (names.length >= 2) {
-      const index1 = Math.floor(Math.random() * names.length);
-      let sorteados = [];
-      let index2;
+    if (names.length >= quant) {
+      const copiaNomes = [...names];
+      const sorteados = [];
 
-      sorteados.push(names[index1].nome);
-
-      do {
-        index2 = Math.floor(Math.random() * names.length);
-      } while (index2 === index1);
-
-      sorteados.push(names[index2].nome);
+      for (let i = 0; i < quant; i++) {
+        const index = Math.floor(Math.random() * copiaNomes.length);
+        sorteados.push(copiaNomes[index].nome);
+        copiaNomes.splice(index, 1);
+      }
 
       setDrawer_n(sorteados);
-      console.log("Sorteados:", sorteados);
     } else {
-      alert("É necessário pelo menos 2 nomes para o sorteio.");
+      alert(`É necessário pelo menos ${quant} nomes para o sorteio.`);
     }
   };
 
   return (
     <>
-      <Header />
-
       <section>
         <main className="container">
           <div className="top_bar">
-            <div className="header2">
-              <h2>Sorteio dos Nomes</h2>
+            <div className="header">
+              <img src={logo} alt="Logo Jantar & Negócios" />
+
+              <h1>N°25</h1>
+
+              <div className="form_qtd">
+                <input
+                  id="qtd"
+                  type="text"
+                  min={1}
+                  max={names.length}
+                  value={quant}
+                  onChange={(e) => setQuant(Number(e.target.value))}
+                />
+              </div>
             </div>
-            <span className="total_p">
-              Total de Participantes: {names.length}
-            </span>
           </div>
 
           {drawer_n.length > 0 && (
@@ -62,7 +69,7 @@ function App() {
           )}
 
           <button className="drawer_b" onClick={name_drawer}>
-            Sortear
+            <img src={play} alt="Player" />
           </button>
         </main>
       </section>
