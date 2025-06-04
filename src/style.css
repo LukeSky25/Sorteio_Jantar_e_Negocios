@@ -5,12 +5,12 @@
   font-family: Arial, Helvetica, sans-serif;
 }
 
-@font-face {
+/* @font-face {
   font-family: "JantarFonte";
   src: url("../public/fonts/Arsis.woff2") format("woff");
   font-weight: normal;
   font-style: normal;
-}
+} */
 
 body {
   background-color: #40e0d0;
@@ -29,14 +29,15 @@ body {
 }
 
 .header img {
-  width: 500px;
+  width: 550px;
   height: auto;
   object-fit: contain;
 }
 
-.header h1 {
-  font-family: "JantarFonte", Arial, sans-serif;
-  font-size: 75px;
+.header .edition {
+  /* font-family: "JantarFonte", Arial, sans-serif; */
+  font-size: 33px;
+  font-weight: normal;
 }
 
 .form_qtd {
@@ -46,15 +47,26 @@ body {
   margin-top: 30px;
 }
 
-.form_qtd input {
+.form_qtd input[type="number"] {
   width: 50px;
   height: 50px;
-  padding: 5px;
   font-size: 20px;
   margin-top: 5px;
-  text-align: center;
   border-radius: 6px;
   border: 1px solid #ccc;
+  text-align: center;
+
+  padding-left: 5px;
+  padding-right: 5px;
+
+  /* Evita que as setas empurrem o número */
+  text-align: center;
+}
+
+.form_qtd input::-webkit-inner-spin-button,
+.form_qtd input::-webkit-outer-spin-button {
+  opacity: 0.5;
+  width: 6px;
 }
 
 .container {
@@ -76,29 +88,37 @@ body {
   justify-content: center;
 }
 
+.random {
+  margin-top: 75px;
+  display: flex;
+  justify-content: center;
+}
+
 .random ul {
   display: flex;
   justify-content: center;
-  gap: 20px;
+  align-items: center;
   list-style: none;
-  font-style: italic;
+  padding: 0;
+  margin: 0;
 }
 
 .random li {
-  font-size: 35px;
-  border: 2.5px #374667 solid;
+  font-size: 36px;
   border-radius: 10px;
   background-color: aliceblue;
   text-align: center;
-  padding: 10px;
-  margin: 15px;
-  display: flex;
-  position: relative;
-  font-weight: bold;
+  padding: 15px 30px;
+  margin: 0 50px;
+  white-space: nowrap;
+  transition: 0.2s;
 }
 
-.random {
-  margin-top: 90px;
+.random li:hover {
+  transition: 0.1s;
+  font-size: 40px;
+  padding: 15px 35px;
+  box-shadow: 10px 10px 5px 2px #5e9c94;
 }
 
 .drawer_b {
@@ -110,7 +130,7 @@ body {
   border: none;
   border-radius: 100%;
   cursor: pointer;
-  margin-top: 60px;
+  margin-top: 90px;
 }
 
 .drawer_b img {
@@ -120,4 +140,33 @@ body {
 
 .drawer_b .play {
   background-color: #f00000;
+}
+
+.form_names {
+  text-align: center;
+  margin-top: 200px;
+}
+
+.form_names textarea {
+  width: 500px;
+  height: 500px;
+  font-size: 18px;
+  padding: 10px;
+  text-align: center;
+  border: solid 3px #374667;
+}
+
+.form_names textarea.names_invisible {
+  height: 34px;
+}
+
+.form_names textarea.names_visible {
+  height: 500px;
+}
+
+.form_names button {
+  position: absolute;
+  border: solid 3px #374667;
+  cursor: pointer;
+  padding: 2px;
 }
