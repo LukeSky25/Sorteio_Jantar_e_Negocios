@@ -1,18 +1,22 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 
-import logo from "./assets/logo.png";
-import play from "./assets/play.jpg";
+import play from "../../assets/play.jpg";
+
+import { useStyle } from "../../Context/StyleContext";
 
 import "./style.css";
 
-function App() {
+function Home() {
   const [names, setNames] = useState([]);
   const [drawer_n, setDrawer_n] = useState([]);
   const [quant, setQuant] = useState(1);
   const [isVisible, setIsVisible] = useState(true);
+
+  const { styleConfig } = useStyle();
 
   const textAreaRef = useRef(null);
 
@@ -22,7 +26,7 @@ function App() {
 
   const reset = async () => {
     try {
-      const res = await axios.get("http://localhost:3001/escrever/lista.txt");
+      const res = await axios.get("http://localhost:3001/reset/lista.txt");
 
       console.log(res.data);
     } catch (error) {
@@ -44,7 +48,12 @@ function App() {
         "http://localhost:3001/arquivo/nomes.json"
       );
       setNames(novosNomes.data);
-      console.log(sorteados);
+
+      // eslint-disable-next-line no-unused-vars
+      const post = await axios.post(
+        "http://localhost:3001/relatorio/escrever",
+        sorteados
+      );
     } catch (error) {
       alert("Sorteio Finalizado!");
       console.log(error);
@@ -75,7 +84,7 @@ function App() {
         const lines = value.split("\n").filter(Boolean);
 
         const res = await axios.post(
-          "http://localhost:3001/lista/lista.txt",
+          "http://localhost:3001/escrever/lista.txt",
           lines
         );
 
@@ -96,13 +105,28 @@ function App() {
 
   return (
     <>
-      <section>
+      <section
+        className="full-background"
+        style={{
+          background:
+            styleConfig.backgroundType === "color"
+              ? styleConfig.backgroundValue
+              : `url(${styleConfig.backgroundValue})`,
+        }}
+      >
         <main className="container">
           <div className="top_bar">
             <div className="header">
-              <img src={logo} alt="Logo Jantar & Negócios" onClick={reset} />
+              {styleConfig.logo && (
+                <img
+                  src={styleConfig.logo}
+                  alt="Logo"
+                  style={{ width: "550px" }}
+                  onClick={reset}
+                />
+              )}
 
-              <h1 className="edition">Edição Nº211 - El Uruguayo</h1>
+              <h1 className="edition">{styleConfig.title}</h1>
 
               <div className="form_qtd">
                 <input
@@ -144,10 +168,19 @@ function App() {
               {isVisible ? <FaRegEye size={20} /> : <FaRegEyeSlash size={20} />}
             </button>
           </div>
+
+          <div className="buttons">
+            <button id="report_b">
+              <Link to={"/report"}>Relatório</Link>
+            </button>
+            <button id="style_b">
+              <Link to={"/style"}>Estilo</Link>
+            </button>
+          </div>
         </main>
       </section>
     </>
   );
 }
 
-export default App;
+export default Home;

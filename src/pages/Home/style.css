@@ -5,18 +5,13 @@
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* @font-face {
-  font-family: "JantarFonte";
-  src: url("../public/fonts/Arsis.woff2") format("woff");
-  font-weight: normal;
-  font-style: normal;
-} */
-
-body {
-  background-color: #40e0d0;
+.full-background {
+  background-size: cover;
+  background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
-  background-size: cover;
+  min-height: 100vh;
+  width: 100%;
 }
 
 .header {
@@ -35,7 +30,6 @@ body {
 }
 
 .header .edition {
-  /* font-family: "JantarFonte", Arial, sans-serif; */
   font-size: 33px;
   font-weight: normal;
 }
@@ -59,7 +53,6 @@ body {
   padding-left: 5px;
   padding-right: 5px;
 
-  /* Evita que as setas empurrem o número */
   text-align: center;
 }
 
@@ -70,12 +63,11 @@ body {
 }
 
 .container {
-  background-color: #40e0d0;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin: 50px auto;
-  padding: 20px;
+  margin: 0 auto;
+  padding: 40px 20px;
   border-radius: 10px;
   max-width: 100%;
   width: 100%;
@@ -89,7 +81,7 @@ body {
 }
 
 .random {
-  margin-top: 75px;
+  margin-top: 50px;
   display: flex;
   justify-content: center;
 }
@@ -104,19 +96,28 @@ body {
 }
 
 .random li {
-  font-size: 36px;
+  width: 600px;
+  height: 60px;
+  font-size: 28px;
   border-radius: 10px;
   background-color: aliceblue;
   text-align: center;
-  padding: 15px 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   margin: 0 50px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
   transition: 0.2s;
 }
 
 .random li:hover {
   transition: 0.1s;
-  font-size: 40px;
+  font-size: 36px;
   padding: 15px 35px;
   box-shadow: 10px 10px 5px 2px #5e9c94;
 }
@@ -169,4 +170,28 @@ body {
   border: solid 3px #374667;
   cursor: pointer;
   padding: 2px;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  gap: 150px;
+}
+
+.buttons button {
+  font-size: 18px;
+  border-radius: 5px;
+  border: none;
+  width: 90px;
+  padding: 5px 8px;
+}
+
+.buttons button a {
+  text-decoration: none;
+  color: black;
+}
+
+.buttons button a:visited {
+  color: black;
 }

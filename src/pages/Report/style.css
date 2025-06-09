@@ -1,0 +1,72 @@
+.nav-bar {
+  position: relative;
+  background-color: #374667;
+  color: aliceblue;
+  padding: 25px;
+}
+
+.arrow-icon {
+  position: absolute;
+  left: 25px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  cursor: pointer;
+  color: aliceblue;
+  text-decoration: none;
+}
+.arrow-icon:visited {
+  color: aliceblue;
+}
+
+.nav-title {
+  text-align: center;
+  margin: 0;
+  font-size: 24px;
+}
+.container2 {
+  display: flex;
+  justify-content: center;
+}
+
+.report {
+  background-color: aliceblue;
+  margin-top: 100px;
+  margin-bottom: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  width: 600px;
+  height: 475px;
+  border-radius: 10px;
+}
+
+.inf {
+  margin-top: 30px;
+}
+
+.drawn_names,
+.last_name_d {
+  margin-left: 50px;
+  margin-top: 5px;
+}
+
+.last_name_d {
+  list-style-type: none;
+  margin-left: 24.5px;
+}
+
+.download_b {
+  margin-top: 15px;
+}
+
+button.download_b {
+  padding: 7px;
+  border: none;
+  bottom: 0;
+  border-radius: 5px;
+  background-color: #20bcc8;
+  color: aliceblue;
+  cursor: pointer;
+}

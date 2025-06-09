@@ -1,0 +1,51 @@
+.stylization {
+  background-color: aliceblue;
+  margin-top: 35px;
+  margin-bottom: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  width: 600px;
+  height: auto;
+  border-radius: 10px;
+}
+
+.stylization .form {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.title {
+  padding: 4px;
+  width: 400px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.logo_l,
+.logo {
+  margin-top: 10px;
+}
+
+.form select {
+  text-align: center;
+  font-size: 16px;
+}
+
+.reset_b {
+  margin-top: 15px;
+}
+
+button.reset_b {
+  padding: 7px;
+  border: none;
+  bottom: 0;
+  border-radius: 5px;
+  background-color: #20bcc8;
+  color: aliceblue;
+  cursor: pointer;
+}
