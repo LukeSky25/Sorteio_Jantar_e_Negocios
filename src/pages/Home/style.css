@@ -87,12 +87,13 @@
 }
 
 .random ul {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, auto); /* 2 colunas automáticas */
+  gap: 30px 50px; /* espaço entre as linhas e colunas */
+  justify-content: center; /* centraliza o grid */
+
   padding: 0;
-  margin: 0;
+  list-style: none;
 }
 
 .random li {
@@ -115,11 +116,26 @@
   transition: 0.2s;
 }
 
+.random ul:has(li:nth-child(2)) {
+  justify-content: center;
+}
+
+/* Se tiver só 1 item, faça ele ocupar 1 coluna centralizada */
+.random ul:has(li:nth-child(1):only-child) {
+  grid-template-columns: 1fr;
+  justify-content: center;
+}
+
+.random ul.odd-items li:last-child {
+  grid-column: 1 / -1; /* Faz o último item ocupar as duas colunas */
+  justify-self: center; /* Centraliza esse item */
+}
+
 .random li:hover {
   transition: 0.1s;
   font-size: 36px;
   padding: 15px 35px;
-  box-shadow: 10px 10px 5px 2px #5e9c94;
+  box-shadow: 10px 10px 5px 2px #1c1c5c;
 }
 
 .drawer_b {
@@ -194,4 +210,116 @@
 
 .buttons button a:visited {
   color: black;
+}
+
+@media (max-width: 1440px) {
+  .random li {
+    width: 460px;
+    height: 55px;
+    font-size: 25px;
+    margin: 0 25px;
+  }
+
+  .random li:hover {
+    font-size: 30px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .full-background {
+    max-height: 500vh;
+  }
+}
+
+@media (max-width: 1024px) {
+  .random li {
+    width: 400px;
+    height: 50px;
+    font-size: 20px;
+    margin: 0 30px;
+  }
+
+  .random li:hover {
+    font-size: 25px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header img {
+    width: 500px;
+  }
+
+  .header .edition {
+    font-size: 25px;
+  }
+
+  .random li {
+    width: 300px;
+    height: 50px;
+    font-size: 20px;
+    margin: 0 5px;
+  }
+
+  .random li:hover {
+    font-size: 25px;
+  }
+}
+
+@media (max-width: 623px) {
+  .header img {
+    width: 400px;
+  }
+
+  .header .edition {
+    font-size: 20px;
+    font-weight: normal;
+  }
+
+  .random li {
+    width: 200px;
+    height: 40px;
+    font-size: 19px;
+    margin: 0;
+  }
+
+  .random ul {
+    display: flex;
+    flex-direction: column; /* um abaixo do outro */
+    align-items: center; /* centraliza horizontalmente */
+    gap: 20px; /* espaço entre os nomes */
+    list-style: none;
+    padding: 0;
+  }
+
+  .random li {
+    width: 400px;
+    height: 60px;
+    font-size: 17px;
+    border-radius: 10px;
+    background-color: aliceblue;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: 0.2s;
+  }
+
+  .random li:hover {
+    transition: 0.1s;
+    font-size: 20px;
+    padding: 15px 20px;
+    box-shadow: 10px 10px 5px 2px #1c1c5c;
+  }
+
+  .form_names textarea {
+    width: 350px;
+    height: 500px;
+    font-size: 18px;
+    padding: 10px;
+    text-align: center;
+    border: solid 3px #374667;
+  }
 }

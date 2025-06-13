@@ -14,23 +14,32 @@ function Report() {
 
   const { styleConfig } = useStyle();
 
+  // Busca os nomes dos participantes
+
   useEffect(() => {
     axios
-      .get("http://localhost:3001/arquivo/nomes.json")
+      .get(
+        "https://sorteio-jantar-e-negocios-api.onrender.com/arquivo/nomes.json"
+      )
       .then((res) => setNames(res.data))
       .catch((err) => console.log(err));
   }, []);
 
+  // Busca os nomes dos sorteados
+
   useEffect(() => {
     axios
-      .get("http://localhost:3001/relatorio")
+      .get("https://sorteio-jantar-e-negocios-api.onrender.com/relatorio")
       .then((res) => setDrawn_n(res.data))
       .catch((err) => console.log(err));
   }, []);
 
+  // Abaixa arquivo relatorio.pdf
+
   const downloading = () => {
     if (drawn_n == 0) alert("Nenhum nome sorteado");
-    window.location.href = "http://localhost:3001/relatorio/download";
+    window.location.href =
+      "https://sorteio-jantar-e-negocios-api.onrender.com/relatorio/download";
   };
 
   return (

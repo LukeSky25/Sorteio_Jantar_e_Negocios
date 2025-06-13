@@ -49,3 +49,24 @@ button.reset_b {
   color: aliceblue;
   cursor: pointer;
 }
+
+@media (max-width: 623px) {
+  .stylization {
+    padding: 35px;
+    width: 400px;
+    height: auto;
+    border-radius: 10px;
+  }
+
+  .stylization .form {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .stylization .form input.title {
+    width: 350px;
+  }
+}

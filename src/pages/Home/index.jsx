@@ -20,13 +20,19 @@ function Home() {
 
   const textAreaRef = useRef(null);
 
+  // Busca os nomes dos participantes
+
   useEffect(() => {
     getList();
   }, []);
 
+  // Reseta as listas de participante e sorteados
+
   const reset = async () => {
     try {
-      const res = await axios.get("http://localhost:3001/reset/lista.txt");
+      const res = await axios.get(
+        "https://sorteio-jantar-e-negocios-api.onrender.com/reset/lista.txt"
+      );
 
       console.log(res.data);
     } catch (error) {
@@ -34,10 +40,12 @@ function Home() {
     }
   };
 
+  // Busca os nomes sorteados e os envia para /relatorio
+
   const name_drawer = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:3001/sortear/nomes.json/${quant}`
+        `https://sorteio-jantar-e-negocios-api.onrender.com/sortear/nomes.json/${quant}`
       );
 
       const sorteados = res.data.sorteados;
@@ -45,13 +53,13 @@ function Home() {
       setDrawer_n(sorteados);
 
       const novosNomes = await axios.get(
-        "http://localhost:3001/arquivo/nomes.json"
+        "https://sorteio-jantar-e-negocios-api.onrender.com/arquivo/nomes.json"
       );
       setNames(novosNomes.data);
 
       // eslint-disable-next-line no-unused-vars
       const post = await axios.post(
-        "http://localhost:3001/relatorio/escrever",
+        "https://sorteio-jantar-e-negocios-api.onrender.com/relatorio/escrever",
         sorteados
       );
     } catch (error) {
@@ -60,9 +68,13 @@ function Home() {
     }
   };
 
+  // Busca a lista de participantes
+
   const getList = async () => {
     try {
-      const res = await axios.get("http://localhost:3001/lista");
+      const res = await axios.get(
+        "https://sorteio-jantar-e-negocios-api.onrender.com/lista"
+      );
 
       if (textAreaRef.current) {
         if (Array.isArray(res.data)) {
@@ -76,6 +88,8 @@ function Home() {
     }
   };
 
+  // Escreve os nomes na lista de participantes
+
   const writeList = async (e) => {
     try {
       if (e.key === "Enter") {
@@ -84,7 +98,7 @@ function Home() {
         const lines = value.split("\n").filter(Boolean);
 
         const res = await axios.post(
-          "http://localhost:3001/escrever/lista.txt",
+          "http://sorteio-jantar-e-negocios-api.onrender.com/escrever/lista.txt",
           lines
         );
 
@@ -98,6 +112,8 @@ function Home() {
       console.log(error);
     }
   };
+
+  // Torna a textarea visivel e não visivel
 
   const toggleVisibility = () => {
     setIsVisible(!isVisible);
@@ -118,12 +134,7 @@ function Home() {
           <div className="top_bar">
             <div className="header">
               {styleConfig.logo && (
-                <img
-                  src={styleConfig.logo}
-                  alt="Logo"
-                  style={{ width: "550px" }}
-                  onClick={reset}
-                />
+                <img src={styleConfig.logo} alt="Logo" onClick={reset} />
               )}
 
               <h1 className="edition">{styleConfig.title}</h1>
@@ -143,7 +154,7 @@ function Home() {
 
           {drawer_n.length > 0 && (
             <div className="random">
-              <ul>
+              <ul className={drawer_n.length % 2 !== 0 ? "odd-items" : ""}>
                 {drawer_n.map((nome, i) => (
                   <li key={i}>{nome}</li>
                 ))}

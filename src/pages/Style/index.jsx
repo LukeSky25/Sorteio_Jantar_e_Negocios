@@ -11,10 +11,14 @@ import logo from "../../assets/logo.png";
 function Style() {
   const { styleConfig, setStyleConfig } = useStyle();
 
+  // Muda o valor das propriedades do Estilo
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setStyleConfig({ ...styleConfig, [name]: value });
   };
+
+  // Reseta as informações de estilização
 
   const handleReset = () => {
     const defaultStyle = {

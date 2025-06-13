@@ -70,3 +70,11 @@ button.download_b {
   color: aliceblue;
   cursor: pointer;
 }
+
+@media (max-width: 623px) {
+  .report {
+    padding: 35px;
+    width: 400px;
+    height: 475px;
+  }
+}
