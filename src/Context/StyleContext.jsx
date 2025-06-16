@@ -1,22 +1,19 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
-
-import logo from "../assets/logo.png";
+import { createContext, useContext, useState, useEffect } from "react";
 
 const StyleContext = createContext();
 
-export const useStyle = () => useContext(StyleContext);
-
-const defaultStyleConfig = {
-  logo: logo,
+const defaultStyle = {
   title: "Edição Nº - Restaurante: ",
-  backgroundType: "color", // 'color' ou 'image'
+  color: "black",
+  logo: "", // vazio inicialmente
+  backgroundType: "color",
   backgroundValue: "#40e0d0",
 };
 
-export function StyleProvider({ children }) {
+export const StyleProvider = ({ children }) => {
   const [styleConfig, setStyleConfig] = useState(() => {
     const saved = localStorage.getItem("styleConfig");
-    return saved ? JSON.parse(saved) : defaultStyleConfig;
+    return saved ? JSON.parse(saved) : defaultStyle;
   });
 
   useEffect(() => {
@@ -28,4 +25,6 @@ export function StyleProvider({ children }) {
       {children}
     </StyleContext.Provider>
   );
-}
+};
+
+export const useStyle = () => useContext(StyleContext);

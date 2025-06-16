@@ -1,38 +1,40 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 
 import play from "../../assets/play.jpg";
+import Spinner from "../../Components/Spinner";
 
 import { useStyle } from "../../Context/StyleContext";
 
 import "./style.css";
 
 function Home() {
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [names, setNames] = useState([]);
   const [drawer_n, setDrawer_n] = useState([]);
   const [quant, setQuant] = useState(1);
   const [isVisible, setIsVisible] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const { styleConfig } = useStyle();
+  const { styleConfig, setStyleConfig } = useStyle();
 
   const textAreaRef = useRef(null);
 
-  // Busca os nomes dos participantes
-
   useEffect(() => {
-    getList();
-  }, []);
+    fetch(`${API_URL}/style`)
+      .then((res) => res.json())
+      .then((data) => setStyleConfig(data));
+  }, [API_URL, setStyleConfig]);
 
   // Reseta as listas de participante e sorteados
 
   const reset = async () => {
     try {
-      const res = await axios.get(
-        "https://sorteio-jantar-e-negocios-api.onrender.com/reset/lista.txt"
-      );
+      const res = await axios.get(`${API_URL}/reset/lista.txt`);
 
       console.log(res.data);
     } catch (error) {
@@ -44,37 +46,32 @@ function Home() {
 
   const name_drawer = async () => {
     try {
-      const res = await axios.get(
-        `https://sorteio-jantar-e-negocios-api.onrender.com/sortear/nomes.json/${quant}`
-      );
+      setLoading(true);
+      const res = await axios.get(`${API_URL}/sortear/nomes.json/${quant}`);
 
       const sorteados = res.data.sorteados;
 
       setDrawer_n(sorteados);
 
-      const novosNomes = await axios.get(
-        "https://sorteio-jantar-e-negocios-api.onrender.com/arquivo/nomes.json"
-      );
+      const novosNomes = await axios.get(`${API_URL}/arquivo/nomes.json`);
       setNames(novosNomes.data);
 
       // eslint-disable-next-line no-unused-vars
-      const post = await axios.post(
-        "https://sorteio-jantar-e-negocios-api.onrender.com/relatorio/escrever",
-        sorteados
-      );
+      const post = await axios.post(`${API_URL}/relatorio/escrever`, sorteados);
+
+      setLoading(false);
     } catch (error) {
       alert("Sorteio Finalizado!");
       console.log(error);
+      setLoading(false);
     }
   };
 
   // Busca a lista de participantes
 
-  const getList = async () => {
+  const getList = useCallback(async () => {
     try {
-      const res = await axios.get(
-        "https://sorteio-jantar-e-negocios-api.onrender.com/lista"
-      );
+      const res = await axios.get(`${API_URL}/lista`);
 
       if (textAreaRef.current) {
         if (Array.isArray(res.data)) {
@@ -86,7 +83,13 @@ function Home() {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [API_URL]);
+
+  // Busca os nomes dos participantes
+
+  useEffect(() => {
+    getList();
+  }, [getList]);
 
   // Escreve os nomes na lista de participantes
 
@@ -97,10 +100,7 @@ function Home() {
         const value = textArea.value;
         const lines = value.split("\n").filter(Boolean);
 
-        const res = await axios.post(
-          "http://sorteio-jantar-e-negocios-api.onrender.com/escrever/lista.txt",
-          lines
-        );
+        const res = await axios.post(`${API_URL}/escrever/lista.txt`, lines);
 
         console.log("Lista enviada com sucesso:", lines);
 
@@ -134,10 +134,12 @@ function Home() {
           <div className="top_bar">
             <div className="header">
               {styleConfig.logo && (
-                <img src={styleConfig.logo} alt="Logo" onClick={reset} />
+                <img src={`${styleConfig.logo}`} alt="Logo" onClick={reset} />
               )}
 
-              <h1 className="edition">{styleConfig.title}</h1>
+              <h1 className="edition" style={{ color: styleConfig.color }}>
+                {styleConfig.title}
+              </h1>
 
               <div className="form_qtd">
                 <input
@@ -152,7 +154,9 @@ function Home() {
             </div>
           </div>
 
-          {drawer_n.length > 0 && (
+          {loading ? (
+            <Spinner />
+          ) : drawer_n.length > 0 ? (
             <div className="random">
               <ul className={drawer_n.length % 2 !== 0 ? "odd-items" : ""}>
                 {drawer_n.map((nome, i) => (
@@ -160,7 +164,7 @@ function Home() {
                 ))}
               </ul>
             </div>
-          )}
+          ) : null}
 
           <button className="drawer_b" onClick={name_drawer}>
             <img src={play} alt="Player" />
