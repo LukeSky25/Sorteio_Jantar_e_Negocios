@@ -9,6 +9,8 @@ import { useStyle } from "../../Context/StyleContext";
 import "./style.css";
 
 function Report() {
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [names, setNames] = useState([]);
   const [drawn_n, setDrawn_n] = useState([]);
 
@@ -18,28 +20,25 @@ function Report() {
 
   useEffect(() => {
     axios
-      .get(
-        "https://sorteio-jantar-e-negocios-api.onrender.com/arquivo/nomes.json"
-      )
+      .get(`${API_URL}/arquivo/nomes.json`)
       .then((res) => setNames(res.data))
       .catch((err) => console.log(err));
-  }, []);
+  }, [API_URL]);
 
   // Busca os nomes dos sorteados
 
   useEffect(() => {
     axios
-      .get("https://sorteio-jantar-e-negocios-api.onrender.com/relatorio")
+      .get(`${API_URL}/relatorio`)
       .then((res) => setDrawn_n(res.data))
       .catch((err) => console.log(err));
-  }, []);
+  }, [API_URL]);
 
   // Abaixa arquivo relatorio.pdf
 
   const downloading = () => {
     if (drawn_n == 0) alert("Nenhum nome sorteado");
-    window.location.href =
-      "https://sorteio-jantar-e-negocios-api.onrender.com/relatorio/download";
+    window.location.href = `${API_URL}/relatorio/download`;
   };
 
   return (

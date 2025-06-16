@@ -1,15 +1,28 @@
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
 
 import { FaArrowLeft } from "react-icons/fa";
 
-import "./style.css";
-
 import { useStyle } from "../../Context/StyleContext";
+
+import "./style.css";
 
 import logo from "../../assets/logo.png";
 
 function Style() {
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const { styleConfig, setStyleConfig } = useStyle();
+
+  useEffect(() => {
+    fetch(`${API_URL}/style`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(styleConfig),
+    });
+  }, [API_URL, styleConfig]);
 
   // Muda o valor das propriedades do Estilo
 
@@ -23,6 +36,7 @@ function Style() {
   const handleReset = () => {
     const defaultStyle = {
       title: "Edição Nº - Restaurante: ",
+      color: "#000000",
       logo: logo,
       backgroundType: "color",
       backgroundValue: "#40e0d0",
@@ -62,7 +76,15 @@ function Style() {
               <input
                 className="title"
                 name="title"
-                value={styleConfig.title}
+                style={{ color: styleConfig.color }}
+                value={styleConfig.title || ""}
+                onChange={handleChange}
+              />
+              <input
+                type="color"
+                name="color"
+                id="color"
+                value={styleConfig.color || "#000000"}
                 onChange={handleChange}
               />
 
@@ -112,7 +134,7 @@ function Style() {
                   <label>Cor de fundo:</label>
                   <input
                     type="color"
-                    value={styleConfig.backgroundValue}
+                    value={styleConfig.backgroundValue || "#40e0d0"}
                     onChange={(e) =>
                       setStyleConfig({
                         ...styleConfig,
