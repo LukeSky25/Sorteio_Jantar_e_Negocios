@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 
 import { FaArrowLeft } from "react-icons/fa";
-import { useStyle } from "../../Context/StyleContext";
+import { useStyle } from "../../Context/useStyle";
 
 import "./style.css";
 
@@ -13,6 +13,8 @@ function Report() {
 
   const [names, setNames] = useState([]);
   const [drawn_n, setDrawn_n] = useState([]);
+
+  // Configurador de estilo da página
 
   const { styleConfig } = useStyle();
 
@@ -64,11 +66,19 @@ function Report() {
 
             <div className="inf">
               <ul>
+                {/* Busca a quantidade de Participantes */}
+
                 <li>Total de Participantes: {names.length}</li>
+
+                {/* Busca a quantidade de Sorteados */}
+
                 <li>Total de Sorteados: {drawn_n.length}</li>
+
                 <li>
                   Sorteados:
                   <ol>
+                    {/* Mostra os 10 primeiros sorteados */}
+
                     {drawn_n.slice(0, 10).map((p, i) => (
                       <li key={i} className="drawn_names">
                         {p}
@@ -76,6 +86,9 @@ function Report() {
                     ))}
                   </ol>
                 </li>
+
+                {/* Mostra o número do último sorteado */}
+
                 <li className="last_name_d">{drawn_n.length}. ...</li>
               </ul>
             </div>

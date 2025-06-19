@@ -7,7 +7,7 @@ import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 import play from "../../assets/play.jpg";
 import Spinner from "../../Components/Spinner";
 
-import { useStyle } from "../../Context/StyleContext";
+import { useStyle } from "../../Context/useStyle";
 
 import "./style.css";
 
@@ -20,17 +20,13 @@ function Home() {
   const [isVisible, setIsVisible] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const { styleConfig, setStyleConfig } = useStyle();
-
   const textAreaRef = useRef(null);
 
-  useEffect(() => {
-    fetch(`${API_URL}/style`)
-      .then((res) => res.json())
-      .then((data) => setStyleConfig(data));
-  }, [API_URL, setStyleConfig]);
+  // Configurador de estilo da página
 
-  // Reseta as listas de participante e sorteados
+  const { styleConfig } = useStyle();
+
+  // Reseta a lista de participantes e sorteados
 
   const reset = async () => {
     try {
@@ -133,9 +129,13 @@ function Home() {
         <main className="container">
           <div className="top_bar">
             <div className="header">
+              {/* Carrega a logo de StyleContext */}
+
               {styleConfig.logo && (
                 <img src={`${styleConfig.logo}`} alt="Logo" onClick={reset} />
               )}
+
+              {/* Carrega o texto e a cor da edição de StyleContext */}
 
               <h1 className="edition" style={{ color: styleConfig.color }}>
                 {styleConfig.title}
@@ -153,6 +153,8 @@ function Home() {
               </div>
             </div>
           </div>
+
+          {/* Carrega os nomes sorteados da API e utiliza um spinner */}
 
           {loading ? (
             <Spinner />
@@ -180,6 +182,8 @@ function Home() {
               onKeyDown={writeList}
             />
             <button id="hiding_b" onClick={toggleVisibility}>
+              {/* Torna a textarea visivel e não visivel */}
+
               {isVisible ? <FaRegEye size={20} /> : <FaRegEyeSlash size={20} />}
             </button>
           </div>
