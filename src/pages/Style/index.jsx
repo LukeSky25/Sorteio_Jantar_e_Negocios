@@ -3,7 +3,7 @@ import { useEffect } from "react";
 
 import { FaArrowLeft } from "react-icons/fa";
 
-import { useStyle } from "../../Context/StyleContext";
+import { useStyle } from "../../Context/useStyle";
 
 import "./style.css";
 
@@ -12,7 +12,11 @@ import logo from "../../assets/logo.png";
 function Style() {
   const API_URL = import.meta.env.VITE_API_URL;
 
+  // Configurador de estilo da página
+
   const { styleConfig, setStyleConfig } = useStyle();
+
+  // Envia as configurações de estilo para a API
 
   useEffect(() => {
     fetch(`${API_URL}/style`, {
@@ -24,7 +28,7 @@ function Style() {
     });
   }, [API_URL, styleConfig]);
 
-  // Muda o valor das propriedades do Estilo
+  // Muda o valor das propriedades do estilo
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -76,7 +80,6 @@ function Style() {
               <input
                 className="title"
                 name="title"
-                style={{ color: styleConfig.color }}
                 value={styleConfig.title || ""}
                 onChange={handleChange}
               />
@@ -107,6 +110,8 @@ function Style() {
                 }}
               />
 
+              {/* Carrega uma prévia da logo */}
+
               {styleConfig.logo && (
                 <img
                   src={styleConfig.logo}
@@ -129,6 +134,8 @@ function Style() {
                 <option value="image">Imagem</option>
               </select>
 
+              {/* Caso a opção "color" seja selecionada, exibirá as opções de estilização da cor de fundo */}
+
               {styleConfig.backgroundType === "color" && (
                 <>
                   <label>Cor de fundo:</label>
@@ -144,6 +151,8 @@ function Style() {
                   />
                 </>
               )}
+
+              {/* Caso a opção "image" seja selecionada, exibirá as opções de estilização da imagem de fundo */}
 
               {styleConfig.backgroundType === "image" && (
                 <>
