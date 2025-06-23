@@ -116,6 +116,7 @@ function Style() {
                 <img
                   src={styleConfig.logo}
                   alt="Prévia da logo"
+                  className="prev_logo"
                   style={{ maxHeight: "100px", marginTop: "10px" }}
                 />
               )}

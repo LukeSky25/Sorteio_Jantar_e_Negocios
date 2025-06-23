@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
+import { FaPlay } from "react-icons/fa";
 
-import play from "../../assets/play.jpg";
 import Spinner from "../../Components/Spinner";
 
 import { useStyle } from "../../Context/useStyle";
@@ -168,9 +168,11 @@ function Home() {
             </div>
           ) : null}
 
-          <button className="drawer_b" onClick={name_drawer}>
-            <img src={play} alt="Player" />
-          </button>
+          <div className="play-container">
+            <button className="play_button" onClick={name_drawer}>
+              <FaPlay color="red" size={15} />
+            </button>
+          </div>
 
           <div className="form_names">
             <textarea
