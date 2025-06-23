@@ -12,44 +12,29 @@ const defaultStyle = {
 };
 
 export const StyleProvider = ({ children }) => {
+  const API_URL = import.meta.env.VITE_API_URL;
+
   // Configurador de estilo das páginas
+
   const [styleConfig, setStyleConfig] = useState(defaultStyle);
 
-  // Controle para evitar a gravação prematura no localStorage
-
-  const [loading, setLoading] = useState(true);
-
-  // Pega a estilização salva no localStorage e busca a estilização na API e a salva no localStorage
+  // Busca a estilização na API e a salva no back-end
 
   useEffect(() => {
-    // Aqui busca no localstorage
-    const saved = localStorage.getItem("styleConfig");
-    if (saved) {
-      setStyleConfig(JSON.parse(saved));
-      setLoading(false);
-    } else {
-      // Aqui busca do backend
-      fetch(import.meta.env.VITE_API_URL + "/style")
-        .then((res) => res.json())
-        .then((data) => {
-          setStyleConfig(data);
-          localStorage.setItem("styleConfig", JSON.stringify(data));
-          setLoading(false);
-        })
-        .catch((error) => {
-          console.error("Erro ao carregar estilo do backend:", error);
-          setLoading(false);
-        });
-    }
-  }, []);
+    // Aqui busca do backend
 
-  // Salva no localStorage quando o carregamento inicial já acabou
+    const fetchStyle = async () => {
+      try {
+        const res = await fetch(`${API_URL}/style`);
+        const data = await res.json();
+        setStyleConfig(data);
+      } catch (error) {
+        console.error("Erro ao carregar estilo do backend:", error);
+      }
+    };
 
-  useEffect(() => {
-    if (!loading) {
-      localStorage.setItem("styleConfig", JSON.stringify(styleConfig));
-    }
-  }, [styleConfig, loading]);
+    fetchStyle();
+  }, [API_URL]);
 
   return (
     <StyleContext.Provider value={{ styleConfig, setStyleConfig }}>

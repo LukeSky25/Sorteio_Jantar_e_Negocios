@@ -36,8 +36,11 @@
   font-size: 16px;
 }
 
-.reset_b {
+.buttons2 {
   margin-top: 15px;
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
 }
 
 button.reset_b {
@@ -45,7 +48,17 @@ button.reset_b {
   border: none;
   bottom: 0;
   border-radius: 5px;
-  background-color: #20bcc8;
+  background-color: #de1818;
+  color: aliceblue;
+  cursor: pointer;
+}
+
+button.send_b {
+  padding: 7px;
+  border: none;
+  bottom: 0;
+  border-radius: 5px;
+  background-color: #2cb683;
   color: aliceblue;
   cursor: pointer;
 }
@@ -89,6 +102,10 @@ button.reset_b {
   .title {
     font-size: 15px;
   }
+
+  .buttons2 {
+    width: 80%;
+  }
 }
 
 @media (max-width: 376px) {
@@ -112,5 +129,11 @@ button.reset_b {
 
   .prev_logo {
     width: 300px;
+  }
+
+  .buttons2 {
+    flex-direction: column;
+    gap: 30px;
+    width: 150px;
   }
 }
