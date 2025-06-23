@@ -70,3 +70,47 @@ button.reset_b {
     width: 350px;
   }
 }
+
+@media (max-width: 426px) {
+  .stylization {
+    padding: 30px;
+    width: 350px;
+  }
+
+  .stylization .form {
+    margin-top: 35px;
+    gap: 15px;
+  }
+
+  .stylization .form input.title {
+    width: 300px;
+  }
+
+  .title {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 376px) {
+  .stylization {
+    padding: 25px;
+    width: 300px;
+  }
+
+  .stylization .form {
+    margin-top: 35px;
+    gap: 20px;
+  }
+
+  .stylization .form input.title {
+    width: 280px;
+  }
+
+  .title {
+    font-size: 14px;
+  }
+
+  .prev_logo {
+    width: 300px;
+  }
+}

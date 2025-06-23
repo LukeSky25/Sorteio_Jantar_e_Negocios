@@ -78,3 +78,23 @@ button.download_b {
     height: 475px;
   }
 }
+
+@media (max-width: 402px) {
+  .report {
+    padding: 30px;
+    width: 350px;
+    height: 475px;
+  }
+}
+
+@media (max-width: 355px) {
+  .report {
+    padding: 25px;
+    width: 300px;
+    height: 475px;
+  }
+
+  .nav-title {
+    font-size: 20px;
+  }
+}
