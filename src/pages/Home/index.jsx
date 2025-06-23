@@ -154,16 +154,18 @@ function Home() {
             </div>
           </div>
 
-          {/* Carrega os nomes sorteados da API e utiliza um spinner */}
+          {/* Carrega os nomes sorteados da API com apenas os 3 primeiros nomes e utiliza um spinner */}
 
           {loading ? (
             <Spinner />
           ) : drawer_n.length > 0 ? (
             <div className="random">
               <ul className={drawer_n.length % 2 !== 0 ? "odd-items" : ""}>
-                {drawer_n.map((nome, i) => (
-                  <li key={i}>{nome}</li>
-                ))}
+                {drawer_n.map((nome, i) => {
+                  const partes = nome.split(" ");
+                  const nomeResumido = partes.slice(0, 3).join(" ");
+                  return <li key={i}>{nomeResumido}</li>;
+                })}
               </ul>
             </div>
           ) : null}
