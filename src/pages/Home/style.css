@@ -29,7 +29,7 @@
   object-fit: contain;
 }
 
-.header .edition {
+.header h1.edition {
   font-size: 35px;
   font-weight: normal;
 }
@@ -232,7 +232,7 @@
 }
 
 @media (max-width: 2560px) {
-  .header .edition {
+  .header h1.edition {
     font-size: 40px;
   }
 
@@ -240,11 +240,11 @@
     width: 600px;
     height: 120px;
     margin: 0 50px;
-    font-size: 50px;
+    font-size: 40px;
   }
 
   .random li:hover {
-    font-size: 55px;
+    font-size: 45px;
     padding: 15px 35px;
   }
 }
@@ -271,7 +271,7 @@
     width: 850px;
   }
 
-  .header .edition {
+  .header h1.edition {
     font-size: 30px;
   }
 
@@ -292,7 +292,7 @@
     width: 650px;
   }
 
-  .header .edition {
+  .header h1.edition {
     font-size: 25px;
   }
 
@@ -313,7 +313,7 @@
     width: 400px;
   }
 
-  .header .edition {
+  .header h1.edition {
     font-size: 20px;
     font-weight: normal;
   }
@@ -372,8 +372,8 @@
     width: 300px;
   }
 
-  .header .edition {
-    font-size: 17px;
+  .header h1.edition {
+    font-size: 16px;
   }
 
   .random li {
@@ -393,8 +393,8 @@
     width: 300px;
   }
 
-  .header .edition {
-    font-size: 15px;
+  .header h1.edition {
+    font-size: 13px;
   }
 
   .random li {
