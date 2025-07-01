@@ -141,7 +141,7 @@ function Home() {
                 {styleConfig.title}
               </h1>
 
-              <div className="form_qtd">
+              <div className="form">
                 <input
                   id="qtd"
                   type="number"
@@ -150,6 +150,13 @@ function Home() {
                   value={quant}
                   onChange={(e) => setQuant(Number(e.target.value))}
                 />
+
+                <button className="play_button2" onClick={name_drawer}>
+                  Sortear Nomes
+                  <span>
+                    <FaPlay color="red" size={13} />
+                  </span>
+                </button>
               </div>
             </div>
           </div>
@@ -170,11 +177,11 @@ function Home() {
             </div>
           ) : null}
 
-          <div className="play-container">
+          {/* <div className="play-container">
             <button className="play_button" onClick={name_drawer}>
               <FaPlay color="red" size={15} />
             </button>
-          </div>
+          </div> */}
 
           <div className="form_names">
             <textarea
