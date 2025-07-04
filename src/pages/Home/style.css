@@ -130,6 +130,7 @@
   font-size: 28px;
   border-radius: 20px;
   background-color: aliceblue;
+
   text-align: center;
 
   display: flex;
@@ -208,7 +209,7 @@
 
 .form_names {
   text-align: center;
-  margin-top: 200px;
+  margin-top: 300px;
 }
 
 .form_names textarea {
