@@ -260,6 +260,16 @@
   color: black;
 }
 
+.participacoes {
+  color: aliceblue;
+  text-align: center;
+  margin-top: 100px;
+}
+
+.participacoes li {
+  list-style: none;
+}
+
 @media (max-width: 2560px) {
   .header h1.edition {
     font-size: 40px;
