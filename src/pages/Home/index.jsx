@@ -10,6 +10,7 @@ import Spinner from "../../Components/Spinner";
 import { useStyle } from "../../Context/useStyle";
 
 import "./style.css";
+import { supabase } from "../../supabaseClient";
 
 function Home() {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -19,6 +20,8 @@ function Home() {
   const [quant, setQuant] = useState(1);
   const [isVisible, setIsVisible] = useState(true);
   const [loading, setLoading] = useState(false);
+
+  const [dados, setDados] = useState([]);
 
   const textAreaRef = useRef(null);
 
@@ -86,6 +89,55 @@ function Home() {
   useEffect(() => {
     getList();
   }, [getList]);
+
+  useEffect(() => {
+    const buscarParticipacoes = async () => {
+      // Primeiro, buscar o maior id_evento
+      const { data: eventos, error: erroEvento } = await supabase
+        .from("Participacao_Evento")
+        .select("id_evento")
+        .order("id_evento", { ascending: false })
+        .limit(1);
+
+      if (erroEvento) {
+        console.error("Erro ao buscar último evento:", erroEvento);
+        return;
+      }
+
+      const ultimoEventoId =
+        eventos && eventos.length > 0 ? eventos[0].id_evento : null;
+      if (!ultimoEventoId) {
+        setDados([]);
+        return;
+      }
+
+      // Agora buscar apenas as participações do último evento
+      const { data, error } = await supabase
+        .from("Participacao_Evento")
+        .select(
+          `
+          id,
+          id_evento,
+          id_participante,
+          Participante (
+            id,
+            nome,
+            email,
+            empresa
+          )
+        `
+        )
+        .eq("id_evento", ultimoEventoId);
+
+      if (error) {
+        console.error("Erro ao buscar dados:", error);
+      } else {
+        setDados(data);
+      }
+    };
+
+    buscarParticipacoes();
+  }, []);
 
   // Escreve os nomes na lista de participantes
 
@@ -207,6 +259,18 @@ function Home() {
               <Link to={"/style"}>Estilo</Link>
             </button>
           </div>
+
+          {dados.length > 0 && (
+            <div className="participacoes">
+              <h3>Participantes</h3>
+              <br />
+              <ul>
+                {dados.map((item) => (
+                  <li key={item.id}>{item.Participante?.nome.toUpperCase()}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </main>
       </section>
     </>
