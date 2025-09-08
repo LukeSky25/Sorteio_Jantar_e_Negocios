@@ -21,7 +21,10 @@ function Home() {
   const [isVisible, setIsVisible] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const [dados, setDados] = useState([]);
+  //const [participantes, setParticipantes] = useState([]);
+  const [participantesUltimoEvento, setParticipantesUltimoEvento] = useState(
+    []
+  );
 
   const textAreaRef = useRef(null);
 
@@ -88,56 +91,66 @@ function Home() {
 
   useEffect(() => {
     getList();
+    fetchParticipantesUltimoEvento();
   }, [getList]);
 
-  useEffect(() => {
-    const buscarParticipacoes = async () => {
-      // Primeiro, buscar o maior id_evento
-      const { data: eventos, error: erroEvento } = await supabase
-        .from("Participacao_Evento")
-        .select("id_evento")
-        .order("id_evento", { ascending: false })
-        .limit(1);
+  const fetchParticipantesUltimoEvento = async () => {
+    try {
+      // Primeiro, buscar o último evento
+      const { data: ultimoEvento, error: eventoError } = await supabase
+        .from("Evento")
+        .select("id")
+        .order("data_evento", { ascending: false })
+        .limit(1)
+        .single();
 
-      if (erroEvento) {
-        console.error("Erro ao buscar último evento:", erroEvento);
+      if (eventoError || !ultimoEvento) {
+        setParticipantesUltimoEvento([]);
         return;
       }
 
-      const ultimoEventoId =
-        eventos && eventos.length > 0 ? eventos[0].id_evento : null;
-      if (!ultimoEventoId) {
-        setDados([]);
+      // Buscar participações do último evento
+      const { data: participacoes, error: participacaoError } = await supabase
+        .from("Participacao_Evento")
+        .select("id_participante")
+        .eq("id_evento", ultimoEvento.id);
+
+      if (participacaoError || !Array.isArray(participacoes)) {
+        console.error("Erro ao buscar participações:", participacaoError);
+        setParticipantesUltimoEvento([]);
         return;
       }
 
-      // Agora buscar apenas as participações do último evento
-      const { data, error } = await supabase
-        .from("Participacao_Evento")
-        .select(
-          `
-          id,
-          id_evento,
-          id_participante,
-          Participante (
-            id,
-            nome,
-            email,
-            empresa
-          )
-        `
+      // Extrai os ids, filtra nulos/undefined e deduplica
+      const idsParticipantes = Array.from(
+        new Set(
+          participacoes.map((p) => p.id_participante).filter((id) => id != null) // != null pega null e undefined
         )
-        .eq("id_evento", ultimoEventoId);
+      );
 
-      if (error) {
-        console.error("Erro ao buscar dados:", error);
-      } else {
-        setDados(data);
+      if (idsParticipantes.length === 0) {
+        setParticipantesUltimoEvento([]);
+        return;
       }
-    };
 
-    buscarParticipacoes();
-  }, []);
+      // Buscar dados completos dos participantes
+      const { data: participantes, error: participantesError } = await supabase
+        .from("Participante")
+        .select("id, nome, email, empresa")
+        .in("id", idsParticipantes);
+
+      if (participantesError || !Array.isArray(participantes)) {
+        console.error("Erro ao buscar participantes:", participantesError);
+        setParticipantesUltimoEvento([]);
+        return;
+      }
+
+      setParticipantesUltimoEvento(participantes);
+    } catch (error) {
+      console.error("Erro ao buscar participantes do último evento:", error);
+      setParticipantesUltimoEvento([]);
+    }
+  };
 
   // Escreve os nomes na lista de participantes
 
@@ -260,13 +273,17 @@ function Home() {
             </button>
           </div>
 
-          {dados.length > 0 && (
+          {participantesUltimoEvento.length > 0 && (
             <div className="participacoes">
-              <h3>Participantes</h3>
+              <h3>
+                Participantes: {participantesUltimoEvento.length} participantes
+              </h3>
               <br />
               <ul>
-                {dados.map((item) => (
-                  <li key={item.id}>{item.Participante?.nome.toUpperCase()}</li>
+                {participantesUltimoEvento.map((p) => (
+                  <li key={p.id}>
+                    {p.nome ? p.nome.toUpperCase() : "(sem nome)"}
+                  </li>
                 ))}
               </ul>
             </div>

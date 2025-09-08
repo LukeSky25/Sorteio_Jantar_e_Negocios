@@ -168,45 +168,6 @@
   box-shadow: 10px 10px 5px 2px #1c1c5c;
 }
 
-/* .drawer_b {
-  margin-top: auto;
-  align-self: center;
-  justify-content: center;
-  font-weight: bold;
-  background-color: aliceblue;
-  border: none;
-  border-radius: 100%;
-  cursor: pointer;
-  margin-top: 90px;
-}
-
-.drawer_b img {
-  width: 30px;
-  border-radius: 100%;
-}
-
-.drawer_b .play {
-  background-color: #f00000;
-}
-
-.play-container {
-  margin-top: 55px;
-  display: flex;
-  justify-content: center;
-}
-
-.play_button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: white;
-  border: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-} */
-
 .form_names {
   text-align: center;
   margin-top: 300px;
@@ -279,11 +240,11 @@
     width: 600px;
     height: 120px;
     margin: 0 50px;
-    font-size: 40px;
+    font-size: 35px;
   }
 
   .random li:hover {
-    font-size: 45px;
+    font-size: 40px;
     padding: 15px 35px;
   }
 }
@@ -296,12 +257,12 @@
   .random li {
     width: 550px;
     height: 100px;
-    font-size: 45px;
+    font-size: 30px;
     margin: 0 25px;
   }
 
   .random li:hover {
-    font-size: 55px;
+    font-size: 35px;
   }
 }
 
@@ -317,12 +278,12 @@
   .random li {
     width: 400px;
     height: 90px;
-    font-size: 35px;
+    font-size: 25px;
     margin: 0 30px;
   }
 
   .random li:hover {
-    font-size: 40px;
+    font-size: 27px;
   }
 }
 
@@ -338,12 +299,12 @@
   .random li {
     width: 320px;
     height: 70px;
-    font-size: 25px;
+    font-size: 18px;
     margin: 0 5px;
   }
 
   .random li:hover {
-    font-size: 30px;
+    font-size: 20px;
   }
 }
 
@@ -412,7 +373,7 @@
   }
 
   .header h1.edition {
-    font-size: 16px;
+    font-size: 13px;
   }
 
   .random li {
@@ -424,6 +385,19 @@
 
   .random li:hover {
     font-size: 19px;
+  }
+
+  .form_names textarea {
+    width: 290px;
+    height: 500px;
+    font-size: 18px;
+    padding: 10px;
+    text-align: center;
+    border: solid 3px #374667;
+  }
+
+  .buttons {
+    gap: 100px;
   }
 }
 
@@ -448,11 +422,15 @@
   }
 
   .form_names textarea {
-    width: 290px;
+    width: 250px;
     height: 500px;
     font-size: 18px;
     padding: 10px;
     text-align: center;
     border: solid 3px #374667;
+  }
+
+  .buttons {
+    gap: 50px;
   }
 }
