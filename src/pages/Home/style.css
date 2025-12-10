@@ -27,6 +27,7 @@
   width: 1100px;
   height: auto;
   object-fit: contain;
+  cursor: pointer;
 }
 
 .header h1.edition {
@@ -49,8 +50,8 @@
   border-radius: 50px;
   border: 1px solid #ccc;
   text-align: center;
+  align-items: center;
   color: #fff;
-  text-align: center;
   background: rgba(192, 192, 192, 0.5);
   backdrop-filter: blur(10px);
   font-weight: 600;
@@ -72,7 +73,6 @@
   border: 1px solid #ccc;
   display: flex;
   justify-content: center;
-
   align-items: center;
   cursor: pointer;
   font-family: "Roboto";
@@ -108,93 +108,171 @@
   justify-content: center;
 }
 
-.random {
-  margin-top: 50px;
+/* --- NOVOS ESTILOS PARA ESTRUTURA DOS GANHADORES --- */
+
+.random-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 60px; /* Mais espaço no topo */
 }
 
-.random ul {
-  display: grid;
-  grid-template-columns: repeat(2, auto); /* 2 colunas automáticas */
-  gap: 30px 50px; /* espaço entre as linhas e colunas */
-  justify-content: center; /* centraliza o grid */
-
-  padding: 0;
-  list-style: none;
+/* Wrapper que segura o Prêmio, a Bolinha e o Cartão do Nome */
+.winner-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative; /* Importante para a bolinha flutuar aqui dentro */
+  margin: 0 20px;
 }
 
-.random li {
+/* Nome do Prêmio (Texto Dourado em Cima) */
+.prize-label {
+  color: #ffd700; /* Dourado */
+  font-size: 24px;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+  margin-bottom: 8px; /* Espaço entre o prêmio e o nome */
+  background: rgba(0, 0, 0, 0.6);
+  padding: 5px 20px;
+  border-radius: 10px;
+  white-space: nowrap;
+  max-width: 600px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badge da Rodada (Bolinha Vermelha Flutuando) */
+.badge-rodada {
+  position: absolute;
+  top: -20px; /* Sobe um pouco pra fora */
+  left: -15px; /* Vai para a direita pra fora */
+  background: #cc0000;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 50%; /* Faz ficar redondo */
+  font-weight: bold;
+  font-size: 18px;
+  border: 2px solid white;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  z-index: 10; /* Garante que fique na frente de tudo */
+  min-width: 40px;
+  text-align: center;
+}
+
+/* Cartão do Ganhador (Onde fica o nome) */
+.winner-card {
   width: 600px;
-  height: 60px;
+  height: 70px;
   font-size: 28px;
   border-radius: 20px;
   background-color: aliceblue;
-
   text-align: center;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
-  margin: 0 50px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
-
   transition: 0.2s;
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-.random ul:has(li:nth-child(2)) {
-  justify-content: center;
-}
-
-/* Se tiver só 1 item, faça ele ocupar 1 coluna centralizada */
-.random ul:has(li:nth-child(1):only-child) {
-  grid-template-columns: 1fr;
-  justify-content: center;
-}
-
-.random ul.odd-items li:last-child {
-  grid-column: 1 / -1; /* Faz o último item ocupar as duas colunas */
-  justify-self: center; /* Centraliza esse item */
-}
-
-.random li:hover {
+/* Efeito ao passar o mouse no cartão */
+.winner-card:hover {
   transition: 0.1s;
   font-size: 36px;
   padding: 15px 35px;
   box-shadow: 10px 10px 5px 2px #1c1c5c;
+  transform: scale(1.02);
 }
 
-.form_names {
-  text-align: center;
-  margin-top: 300px;
+/* GRID LAYOUT (Para organizar os wrappers) */
+.random {
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
-.form_names textarea {
-  width: 500px;
-  height: 500px;
-  font-size: 18px;
+.random ul {
+  display: grid;
+  grid-template-columns: repeat(2, auto);
+  /* Aumentei o gap vertical (primeiro valor) para caber os prêmios sem bater um no outro */
+  gap: 60px 50px;
+  justify-content: center;
+  padding: 0;
+  list-style: none;
+}
+
+.random ul:has(.winner-wrapper:nth-child(2)) {
+  justify-content: center;
+}
+
+.random ul:has(.winner-wrapper:nth-child(1):only-child) {
+  grid-template-columns: 1fr;
+  justify-content: center;
+}
+
+/* Centraliza o último item se for ímpar */
+.random ul.odd-items .winner-wrapper:last-child {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+
+/* --- ESTILOS DAS ÁREAS DE TEXTO (Input Groups) --- */
+.form_areas_container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 150px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.input-controls button {
+  background: rgba(55, 70, 103, 0.8);
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.names_area {
+  width: 350px;
+  font-size: 16px;
   padding: 10px;
   text-align: center;
   border: solid 3px #374667;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  transition: height 0.3s ease;
 }
 
-.form_names textarea.names_invisible {
-  height: 34px;
+.names_area.invisible {
+  height: 0px;
+  padding: 0;
+  border: none;
+  opacity: 0;
+  overflow: hidden;
 }
 
-.form_names textarea.names_visible {
-  height: 500px;
-}
-
-.form_names button {
-  position: absolute;
-  border: solid 3px #374667;
-  cursor: pointer;
-  padding: 2px;
+.names_area.visible {
+  height: 400px;
+  opacity: 1;
 }
 
 .buttons {
@@ -210,6 +288,7 @@
   border: none;
   width: 90px;
   padding: 5px 8px;
+  cursor: pointer;
 }
 
 .buttons button a {
@@ -231,206 +310,52 @@
   list-style: none;
 }
 
-@media (max-width: 2560px) {
-  .header h1.edition {
-    font-size: 40px;
-  }
-
-  .random li {
-    width: 600px;
-    height: 120px;
-    margin: 0 50px;
-    font-size: 35px;
-  }
-
-  .random li:hover {
-    font-size: 40px;
-    padding: 15px 35px;
-  }
-}
+/* MEDIA QUERIES (Responsividade) */
 
 @media (max-width: 1440px) {
-  .header img {
-    width: 1100px;
+  .winner-card {
+    width: 500px;
+    height: 60px;
+    font-size: 24px;
   }
-
-  .random li {
-    width: 550px;
-    height: 100px;
-    font-size: 30px;
-    margin: 0 25px;
-  }
-
-  .random li:hover {
-    font-size: 35px;
+  .prize-label {
+    font-size: 20px;
+    max-width: 500px;
   }
 }
 
 @media (max-width: 1024px) {
-  .header img {
-    width: 850px;
+  .winner-card {
+    width: 350px;
+    height: 50px;
+    font-size: 20px;
   }
-
-  .header h1.edition {
-    font-size: 30px;
+  .prize-label {
+    font-size: 16px;
+    max-width: 350px;
   }
-
-  .random li {
-    width: 400px;
-    height: 90px;
-    font-size: 25px;
-    margin: 0 30px;
-  }
-
-  .random li:hover {
-    font-size: 27px;
+  .random ul {
+    gap: 50px 20px;
   }
 }
 
 @media (max-width: 768px) {
-  .header img {
-    width: 650px;
+  .winner-card {
+    width: 300px;
   }
-
-  .header h1.edition {
-    font-size: 25px;
+  .prize-label {
+    max-width: 300px;
+    font-size: 14px;
   }
-
-  .random li {
-    width: 320px;
-    height: 70px;
-    font-size: 18px;
-    margin: 0 5px;
-  }
-
-  .random li:hover {
-    font-size: 20px;
-  }
-}
-
-@media (max-width: 623px) {
-  .header img {
-    width: 400px;
-  }
-
-  .header h1.edition {
-    font-size: 20px;
-    font-weight: normal;
-  }
-
-  .random li {
-    width: 200px;
-    height: 40px;
-    font-size: 19px;
-    margin: 0;
-  }
-
+  /* No celular, coloca um embaixo do outro */
   .random ul {
     display: flex;
-    flex-direction: column; /* um abaixo do outro */
-    align-items: center; /* centraliza horizontalmente */
-    gap: 20px; /* espaço entre os nomes */
-    list-style: none;
-    padding: 0;
-  }
-
-  .random li {
-    width: 400px;
-    height: 60px;
-    font-size: 17px;
-    border-radius: 10px;
-    background-color: oklab(97.515% -0.0055 -0.01152);
-    text-align: center;
-    display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: 0.2s;
-  }
-
-  .random li:hover {
-    transition: 0.1s;
-    font-size: 20px;
-    padding: 15px 20px;
-    box-shadow: 10px 10px 5px 2px #1c1c5c;
-  }
-
-  .form_names textarea {
-    width: 350px;
-    height: 500px;
-    font-size: 18px;
-    padding: 10px;
-    text-align: center;
-    border: solid 3px #374667;
-  }
-}
-
-@media (max-width: 425px) {
-  .header img {
-    width: 300px;
-  }
-
-  .header h1.edition {
-    font-size: 13px;
-  }
-
-  .random li {
-    width: 350px;
-    height: 50px;
-    font-size: 18px;
-    margin: 0 5px;
-  }
-
-  .random li:hover {
-    font-size: 19px;
-  }
-
-  .form_names textarea {
-    width: 290px;
-    height: 500px;
-    font-size: 18px;
-    padding: 10px;
-    text-align: center;
-    border: solid 3px #374667;
-  }
-
-  .buttons {
-    gap: 100px;
-  }
-}
-
-@media (max-width: 375px) {
-  .header img {
-    width: 300px;
-  }
-
-  .header h1.edition {
-    font-size: 13px;
-  }
-
-  .random li {
-    width: 300px;
-    height: 50px;
-    font-size: 17px;
-    margin: 0 5px;
-  }
-
-  .random li:hover {
-    font-size: 18px;
-  }
-
-  .form_names textarea {
-    width: 250px;
-    height: 500px;
-    font-size: 18px;
-    padding: 10px;
-    text-align: center;
-    border: solid 3px #374667;
-  }
-
-  .buttons {
     gap: 50px;
+  }
+  .form_areas_container {
+    flex-direction: column;
+    align-items: center;
   }
 }
