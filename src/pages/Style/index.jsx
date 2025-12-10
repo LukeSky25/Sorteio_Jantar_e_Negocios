@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
 
 import { FaArrowLeft } from "react-icons/fa";
 
@@ -17,42 +18,15 @@ function Style() {
 
   // Envia as configurações de estilo para a API
 
-  const saveStyleBackend = () => {
+  useEffect(() => {
     fetch(`${API_URL}/style`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(styleConfig),
-    })
-      .then(() => alert("Estilo salvo com sucesso"))
-      .catch((error) => console.log("Erro ao salvar Estilo: ", error));
-  };
-
-  // Envia as imagens para a API
-
-  const handleFileUpload = async (file, type) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await fetch(`${API_URL}/upload`, {
-        method: "POST",
-        body: formData,
-      });
-
-      const data = await response.json();
-
-      const fullUrl = `${API_URL}${data.filePath}`;
-
-      setStyleConfig({
-        ...styleConfig,
-        [type]: fullUrl,
-      });
-    } catch (error) {
-      console.error("Erro ao enviar arquivo:", error);
-    }
-  };
+    });
+  }, [API_URL, styleConfig]);
 
   // Muda o valor das propriedades do estilo
 
@@ -72,6 +46,7 @@ function Style() {
       backgroundValue: "#40e0d0",
     };
 
+    localStorage.removeItem("styleConfig");
     setStyleConfig(defaultStyle);
   };
 
@@ -89,7 +64,11 @@ function Style() {
           background:
             styleConfig.backgroundType === "color"
               ? styleConfig.backgroundValue
-              : `url(${styleConfig.backgroundValue}) no-repeat center center / cover`,
+              : `${
+                  styleConfig.backgroundValue
+                    ? `url(${styleConfig.backgroundValue})`
+                    : "none"
+                }, #40e0d0`,
         }}
       >
         <main>
@@ -119,7 +98,16 @@ function Style() {
                 className="logo"
                 type="file"
                 accept="image/*"
-                onChange={(e) => handleFileUpload(e.target.files[0], "logo")}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setStyleConfig({ ...styleConfig, logo: reader.result });
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
               />
 
               {/* Carrega uma prévia da logo */}
@@ -173,22 +161,26 @@ function Style() {
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) =>
-                      handleFileUpload(e.target.files[0], "backgroundValue")
-                    }
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setStyleConfig({
+                            ...styleConfig,
+                            backgroundValue: reader.result,
+                          });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
                   />
                 </>
               )}
 
-              <div className="buttons2">
-                <button onClick={handleReset} className="reset_b">
-                  Resetar Estilo para o Padrão
-                </button>
-
-                <button onClick={saveStyleBackend} className="send_b">
-                  Salvar Estilo
-                </button>
-              </div>
+              <button onClick={handleReset} className="reset_b">
+                Resetar Estilo para o Padrão
+              </button>
             </div>
           </div>
         </main>
