@@ -23,8 +23,30 @@
   justify-content: center;
 }
 
+ol#top_page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  list-style-type: none;
+  gap: 60px;
+  margin-bottom: 60px;
+}
+
+li.sponsor {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 150px;
+  height: 150px;
+}
+
+li.sponsor img {
+  width: 200px;
+  border-radius: 20px;
+}
+
 .header img {
-  width: 1100px;
+  width: 600px;
   height: auto;
   object-fit: contain;
   cursor: pointer;
@@ -35,18 +57,24 @@
   font-weight: normal;
 }
 
+div.info {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-top: 130px;
+}
+
 .form {
   display: flex;
   align-items: center;
-  margin-top: 30px;
-  gap: 5px;
+  justify-content: center;
+  gap: 10px;
 }
 
 .form input[type="number"] {
   width: 85px;
   height: 50px;
   font-size: 20px;
-  margin-top: 5px;
   border-radius: 50px;
   border: 1px solid #ccc;
   text-align: center;
@@ -130,7 +158,7 @@
 /* Nome do Prêmio (Texto Dourado em Cima) */
 .prize-label {
   color: #ffd700; /* Dourado */
-  font-size: 24px;
+  font-size: 25px;
   font-weight: bold;
   text-transform: uppercase;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
@@ -357,5 +385,132 @@
   .form_areas_container {
     flex-direction: column;
     align-items: center;
+  }
+}
+
+/* --- MEDIA QUERIES (Responsividade Refinada) --- */
+
+/* Telas Médias (Laptops e Tablets Paisagem) */
+@media (max-width: 1440px) {
+  li.sponsor {
+    width: 150px;
+    height: 150px;
+  }
+  li.sponsor img {
+    width: 150px;
+  }
+
+  .header img {
+    width: 600px;
+  }
+
+  .winner-card {
+    width: 450px;
+    height: 60px;
+    font-size: 22px;
+  }
+  ol#top_page {
+    gap: 15px;
+  }
+}
+
+/* Tablets (Retrato) */
+@media (max-width: 1024px) {
+  li.sponsor {
+    width: 100px;
+    height: 100px;
+  }
+  li.sponsor img {
+    width: 120px;
+  }
+  .header img {
+    width: 400px;
+  }
+  .info {
+    flex-direction: column;
+    gap: 30px;
+    margin-top: 80px;
+  }
+  .winner-card {
+    width: 350px;
+    font-size: 18px;
+  }
+}
+
+/* Celulares Grandes e Tablets Pequenos (768px) */
+@media (max-width: 768px) {
+  ol#top_page {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Logos em 2 colunas */
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  /* Centraliza a Logo principal no grid mobile */
+  li.sponsor2 {
+    grid-column: span 2;
+    order: -1;
+  }
+
+  .header img {
+    width: 80%; /* Logo principal diminui */
+  }
+
+  .random ul {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 60px;
+  }
+
+  .winner-card {
+    width: 90vw; /* Card ocupa quase a largura toda da tela */
+    max-width: 350px;
+  }
+
+  .buttons {
+    gap: 40px;
+  }
+}
+
+/* Celulares Pequenos (480px) */
+@media (max-width: 480px) {
+  .edition {
+    font-size: 24px !important;
+    text-align: center;
+  }
+
+  .form {
+    flex-direction: column; /* Input em cima do botão */
+    width: 100%;
+  }
+
+  .form input[type="number"] {
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .play_button2 {
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .names_area {
+    width: 90vw; /* Textarea responsivo */
+  }
+
+  .prize-label {
+    font-size: 14px;
+    padding: 5px 10px;
+  }
+
+  .winner-card {
+    height: 55px;
+    font-size: 18px;
+  }
+
+  /* Ajuste das logos dos patrocinadores para caber em telas mínimas */
+  li.sponsor img {
+    width: 80px;
   }
 }

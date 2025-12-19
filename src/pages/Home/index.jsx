@@ -6,6 +6,12 @@ import axios from "axios";
 import { FaRegEye, FaRegEyeSlash, FaGift } from "react-icons/fa6";
 import { FaPlay } from "react-icons/fa";
 
+// Imagens
+import Mondial from "../../assets/mondial.jpg";
+import Aiwa from "../../assets/aiwa.jpg";
+import Bradesco from "../../assets/bradesco.jpg";
+import MPD from "../../assets/mpd.jpg";
+
 // Componentes e Contexto
 import Spinner from "../../Components/Spinner";
 import { useStyle } from "../../Context/useStyle";
@@ -64,6 +70,48 @@ function Home() {
       window.removeEventListener("resize", detectSize);
     };
   }, [windowDimension]);
+
+  // Pega a lista de brindes do Back
+
+  const getBrindes = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API_URL}/lista-brindes`);
+      if (Array.isArray(res.data)) {
+        setListaBrindes(res.data);
+        setTextoBrindes(res.data.join("\n"));
+      }
+    } catch (error) {
+      console.log("Erro ao buscar brindes:", error);
+    }
+  }, [API_URL]);
+
+  // Salva na api a nova lista de brindes
+
+  const writeBrindes = async (e) => {
+    try {
+      if (e.key === "Enter") {
+        const linhas = textoBrindes
+          .split("\n")
+          .filter((item) => item.trim() !== "");
+        await axios.post(`${API_URL}/escrever-brindes`, linhas);
+        console.log("Brindes salvos no servidor");
+      }
+    } catch (error) {
+      console.error("Erro ao salvar brindes:", error);
+    }
+  };
+
+  // Busca a lista de nomes processados (JSON) para contar quantos faltam sortear
+  const getNames = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API_URL}/arquivo/nomes.json`);
+      if (Array.isArray(res.data)) {
+        setNames(res.data);
+      }
+    } catch (error) {
+      console.log("Erro ao buscar nomes.json:", error);
+    }
+  }, [API_URL]);
 
   // --- FUNÇÃO RESET ---
   const reset = async () => {
@@ -141,9 +189,11 @@ function Home() {
   }, [API_URL]);
 
   useEffect(() => {
+    getNames();
     getList();
+    getBrindes();
     fetchParticipantesUltimoEvento();
-  }, [getList]);
+  }, [getList, getBrindes, getNames]);
 
   // Manipula o texto da lista de brindes
   const handleBrindesChange = (e) => {
@@ -257,31 +307,31 @@ function Home() {
         <main className="container">
           <div className="top_bar">
             <div className="header">
-              {styleConfig.logo && (
-                <img src={`${styleConfig.logo}`} alt="Logo" onClick={reset} />
-              )}
+              <ol id="top_page">
+                <li className="sponsor">
+                  <img src={Mondial} alt="Mondial" />
+                </li>
+                <li className="sponsor">
+                  <img src={Aiwa} alt="Aiwa" />
+                </li>
 
-              <h1 className="edition" style={{ color: styleConfig.color }}>
-                {styleConfig.title}
-              </h1>
+                <li className="sponsor2">
+                  {styleConfig.logo && (
+                    <img
+                      src={`${styleConfig.logo}`}
+                      alt="Logo"
+                      onClick={reset}
+                    />
+                  )}
+                </li>
 
-              <div className="form">
-                <input
-                  id="qtd"
-                  type="number"
-                  min={1}
-                  max={names.length}
-                  value={quant}
-                  onChange={(e) => setQuant(Number(e.target.value))}
-                />
-
-                <button className="play_button2" onClick={name_drawer}>
-                  Sortear Nomes
-                  <span>
-                    <FaPlay color="red" size={13} style={{ marginLeft: 5 }} />
-                  </span>
-                </button>
-              </div>
+                <li className="sponsor">
+                  <img src={Bradesco} alt="Bradesco" />
+                </li>
+                <li className="sponsor">
+                  <img src={MPD} alt="MPD" />
+                </li>
+              </ol>
             </div>
           </div>
 
@@ -323,6 +373,30 @@ function Home() {
               </div>
             </div>
           ) : null}
+
+          <div className="info">
+            <h1 className="edition" style={{ color: styleConfig.color }}>
+              {styleConfig.title}
+            </h1>
+
+            <div className="form">
+              <input
+                id="qtd"
+                type="number"
+                min={1}
+                max={names.length}
+                value={quant}
+                onChange={(e) => setQuant(Number(e.target.value))}
+              />
+
+              <button className="play_button2" onClick={name_drawer}>
+                Sortear Nomes
+                <span>
+                  <FaPlay color="red" size={13} style={{ marginLeft: 5 }} />
+                </span>
+              </button>
+            </div>
+          </div>
 
           {/* --- ÁREA DE INPUTS (NOMES E BRINDES) --- */}
           <div className="form_areas_container">
@@ -377,6 +451,7 @@ function Home() {
                 }`}
                 value={textoBrindes}
                 onChange={handleBrindesChange}
+                onKeyDown={writeBrindes}
                 placeholder="Cole a lista de BRINDES aqui (um por linha)..."
                 style={{ borderColor: "#ffd700" }}
               />
