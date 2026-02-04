@@ -193,7 +193,7 @@ div.info {
 /* Cartão do Ganhador (Onde fica o nome) */
 .winner-card {
   width: 600px;
-  height: 70px;
+  height: 80px;
   font-size: 28px;
   border-radius: 20px;
   background-color: aliceblue;

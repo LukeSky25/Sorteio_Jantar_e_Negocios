@@ -1,47 +1,69 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-
 import axios from "axios";
-
-import { FaArrowLeft } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaUsers,
+  FaUserTie,
+  FaGift,
+  FaDownload,
+  FaFloppyDisk,
+} from "react-icons/fa6";
 import { useStyle } from "../../Context/useStyle";
-
 import "./style.css";
 
 function Report() {
   const API_URL = import.meta.env.VITE_API_URL;
-
-  const [names, setNames] = useState([]);
-  const [drawn_n, setDrawn_n] = useState([]);
-
-  // Configurador de estilo da página
-
   const { styleConfig } = useStyle();
 
-  // Busca os nomes dos participantes
+  const [names, setNames] = useState([]);
+  const [drawnList, setDrawnList] = useState([]);
+  const [staffCount, setStaffCount] = useState("0");
+  const [isSavingStaff, setIsSavingStaff] = useState(false);
 
+  // Carrega dados iniciais
   useEffect(() => {
+    // 1. Participantes
     axios
       .get(`${API_URL}/arquivo/nomes.json`)
       .then((res) => setNames(res.data))
       .catch((err) => console.log(err));
-  }, [API_URL]);
 
-  // Busca os nomes dos sorteados
-
-  useEffect(() => {
+    // 2. Sorteados (Lê o arquivo de texto bruto para mostrar o histórico completo)
     axios
       .get(`${API_URL}/relatorio`)
-      .then((res) => setDrawn_n(res.data))
+      .then((res) => setDrawnList(res.data))
       .catch((err) => console.log(err));
+
+    // 3. Staffs
+    axios
+      .get(`${API_URL}/staffs`)
+      .then((res) => setStaffCount(res.data.quantidade))
+      .catch((err) => console.log("Erro ao ler staffs", err));
   }, [API_URL]);
 
-  // Abaixa arquivo relatorio.pdf
+  // Salva staffs no backend
+  const handleSaveStaffs = async () => {
+    try {
+      setIsSavingStaff(true);
+      await axios.post(`${API_URL}/staffs`, { quantidade: staffCount });
+      setIsSavingStaff(false);
+      alert("Número de Staffs atualizado!");
+    } catch (error) {
+      console.error(error);
+      setIsSavingStaff(false);
+    }
+  };
 
   const downloading = () => {
-    if (drawn_n == 0) alert("Nenhum nome sorteado");
+    if (drawnList.length === 0) return alert("Nenhum nome sorteado ainda.");
     window.location.href = `${API_URL}/relatorio/download`;
   };
+
+  // Filtra apenas as linhas que são ganhadores (ignorando títulos de rodada para contagem)
+  const totalGanhadoresReais = drawnList.filter(
+    (l) => !l.includes("--- RODADA"),
+  ).length;
 
   return (
     <>
@@ -49,10 +71,11 @@ function Report() {
         <Link to={"/"}>
           <FaArrowLeft size={20} className="arrow-icon" />
         </Link>
-        <h1 className="nav-title">Relatório do Sorteio</h1>
+        <h1 className="nav-title">Relatório Geral</h1>
       </nav>
+
       <section
-        className="container2"
+        className="container-report"
         style={{
           background:
             styleConfig.backgroundType === "color"
@@ -60,41 +83,87 @@ function Report() {
               : `url(${styleConfig.backgroundValue})`,
         }}
       >
-        <main>
-          <div className="report">
-            <h1>Informações</h1>
+        <main className="report-card">
+          <div className="report-header">
+            <h2>{styleConfig.title || "Resumo do Evento"}</h2>
+            <p>Painel de controle e exportação</p>
+          </div>
 
-            <div className="inf">
-              <ul>
-                {/* Busca a quantidade de Participantes */}
-
-                <li>Total de Participantes: {names.length}</li>
-
-                {/* Busca a quantidade de Sorteados */}
-
-                <li>Total de Sorteados: {drawn_n.length}</li>
-
-                <li>
-                  Sorteados:
-                  <ol>
-                    {/* Mostra os 10 primeiros sorteados */}
-
-                    {drawn_n.slice(0, 10).map((p, i) => (
-                      <li key={i} className="drawn_names">
-                        {p}
-                      </li>
-                    ))}
-                  </ol>
-                </li>
-
-                {/* Mostra o número do último sorteado */}
-
-                <li className="last_name_d">{drawn_n.length}. ...</li>
-              </ul>
+          {/* --- DASHBOARD DE ESTATÍSTICAS --- */}
+          <div className="stats-grid">
+            <div className="stat-card">
+              <div className="icon-box blue">
+                <FaUsers />
+              </div>
+              <div>
+                <h3>{names.length}</h3>
+                <p>Convidados</p>
+              </div>
             </div>
 
-            <button className="download_b" onClick={downloading}>
-              Baixar Relatório
+            <div className="stat-card">
+              <div className="icon-box green">
+                <FaGift />
+              </div>
+              <div>
+                <h3>{totalGanhadoresReais}</h3>
+                <p>Sorteados</p>
+              </div>
+            </div>
+
+            <div className="stat-card input-card">
+              <div className="icon-box purple">
+                <FaUserTie />
+              </div>
+              <div className="staff-input-wrapper">
+                <label>Staffs</label>
+                <div className="input-row">
+                  <input
+                    type="number"
+                    value={staffCount}
+                    onChange={(e) => setStaffCount(e.target.value)}
+                  />
+                  <button onClick={handleSaveStaffs} title="Salvar Staffs">
+                    {isSavingStaff ? "..." : <FaFloppyDisk />}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="divider"></div>
+
+          {/* --- LISTA DE GANHADORES COM ROLAGEM --- */}
+          <div className="list-section">
+            <h3>Histórico de Sorteio</h3>
+            <div className="scroll-box">
+              {drawnList.length === 0 ? (
+                <p className="empty-msg">Nenhum sorteio realizado ainda.</p>
+              ) : (
+                <ul>
+                  {drawnList.map((linha, i) => {
+                    // Renderização condicional para Títulos de Rodada vs Nomes
+                    if (linha.includes("--- RODADA")) {
+                      return (
+                        <li key={i} className="rodada-header">
+                          {linha.replace(/---/g, "")}
+                        </li>
+                      );
+                    }
+                    return (
+                      <li key={i} className="winner-item">
+                        {linha}
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          </div>
+
+          <div className="footer-actions">
+            <button className="download-btn" onClick={downloading}>
+              <FaDownload /> Baixar PDF Completo
             </button>
           </div>
         </main>

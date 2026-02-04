@@ -6,12 +6,6 @@ import axios from "axios";
 import { FaRegEye, FaRegEyeSlash, FaGift } from "react-icons/fa6";
 import { FaPlay } from "react-icons/fa";
 
-// Imagens
-import Mondial from "../../assets/mondial.jpg";
-import Aiwa from "../../assets/aiwa.jpg";
-import Bradesco from "../../assets/bradesco.jpg";
-import MPD from "../../assets/mpd.jpg";
-
 // Componentes e Contexto
 import Spinner from "../../Components/Spinner";
 import { useStyle } from "../../Context/useStyle";
@@ -32,14 +26,13 @@ function Home() {
   const [quant, setQuant] = useState(1);
   const [loading, setLoading] = useState(false);
   const [participantesUltimoEvento, setParticipantesUltimoEvento] = useState(
-    []
+    [],
   );
 
   // Estados da lógica de Prêmios e Rodadas
   const [rodada, setRodada] = useState(0);
   const [listaBrindes, setListaBrindes] = useState([]);
   const [textoBrindes, setTextoBrindes] = useState("");
-  const [indiceBrinde, setIndiceBrinde] = useState(0); // Controla qual prêmio da lista será pego
 
   // Controle de Visualização (Inputs e Confetes)
   const [isVisibleNames, setIsVisibleNames] = useState(false);
@@ -72,7 +65,6 @@ function Home() {
   }, [windowDimension]);
 
   // Pega a lista de brindes do Back
-
   const getBrindes = useCallback(async () => {
     try {
       const res = await axios.get(`${API_URL}/lista-brindes`);
@@ -86,7 +78,6 @@ function Home() {
   }, [API_URL]);
 
   // Salva na api a nova lista de brindes
-
   const writeBrindes = async (e) => {
     try {
       if (e.key === "Enter") {
@@ -95,13 +86,15 @@ function Home() {
           .filter((item) => item.trim() !== "");
         await axios.post(`${API_URL}/escrever-brindes`, linhas);
         console.log("Brindes salvos no servidor");
+        // Recarrega para garantir sincronia
+        getBrindes();
       }
     } catch (error) {
       console.error("Erro ao salvar brindes:", error);
     }
   };
 
-  // Busca a lista de nomes processados (JSON) para contar quantos faltam sortear
+  // Busca a lista de nomes processados (JSON)
   const getNames = useCallback(async () => {
     try {
       const res = await axios.get(`${API_URL}/arquivo/nomes.json`);
@@ -117,44 +110,51 @@ function Home() {
   const reset = async () => {
     try {
       setRodada(0);
-      setIndiceBrinde(0);
       setDrawer_n([]);
       setShowConfetti(false);
       const res = await axios.get(`${API_URL}/reset/lista.txt`);
       console.log(res.data);
+      // Atualiza as listas após resetar
+      getNames();
+      getBrindes();
     } catch (error) {
       console.log(error);
     }
   };
 
-  // --- FUNÇÃO DE SORTEIO ---
+  // --- FUNÇÃO DE SORTEIO (CORRIGIDA PARA RODADAS) ---
   const name_drawer = async () => {
     try {
       setLoading(true);
-      setShowConfetti(false); // Reseta confetes antes de começar
+      setShowConfetti(false);
       setRecycleConfetti(true);
 
-      // 1. Busca sorteados
+      // 1. Calcula a nova rodada
+      const novaRodada = rodada + 1;
+
+      // 2. O Backend sorteia e retorna ["Nome - Prêmio", ...]
       const res = await axios.get(`${API_URL}/sortear/nomes.json/${quant}`);
-      const sorteados = res.data.sorteados;
+      const sorteadosFormatados = res.data.sorteados;
 
-      // 2. Atualiza tela
-      setDrawer_n(sorteados);
+      // 3. Atualiza tela (Visual)
+      setDrawer_n(sorteadosFormatados);
 
-      // 3. Atualiza lista geral
+      // 4. Atualiza lista geral de nomes disponíveis (para subtrair a quantidade)
       const novosNomes = await axios.get(`${API_URL}/arquivo/nomes.json`);
       setNames(novosNomes.data);
 
-      // 4. Lógica de Rodada e Prêmios
-      setRodada((prev) => prev + 1);
-      setIndiceBrinde((prev) => prev + sorteados.length); // Avança na lista de prêmios
+      // 5. Salva relatório -> ENVIANDO O OBJETO { nomes, rodada }
+      await axios.post(`${API_URL}/relatorio/escrever`, {
+        nomes: sorteadosFormatados,
+        rodada: novaRodada,
+      });
 
-      // 5. Salva relatório
-      // eslint-disable-next-line no-unused-vars
-      const post = await axios.post(`${API_URL}/relatorio/escrever`, sorteados);
+      // 6. Atualiza estado da rodada
+      setRodada(novaRodada);
 
       setLoading(false);
 
+      // Animação de Confetes
       setShowConfetti(true);
       setRecycleConfetti(true);
 
@@ -162,12 +162,14 @@ function Home() {
         setRecycleConfetti(false);
       }, 2000);
 
-      // 3. Após 10 segundos (tempo suficiente para todos caírem), remove o componente
       setTimeout(() => {
         setShowConfetti(false);
       }, 10000);
     } catch (error) {
-      alert("Sorteio Finalizado ou Erro de conexão!");
+      const msg =
+        error.response?.data?.mensagem ||
+        "Sorteio Finalizado ou Erro de conexão!";
+      alert(msg);
       console.log(error);
       setLoading(false);
     }
@@ -229,8 +231,10 @@ function Home() {
 
       const idsParticipantes = Array.from(
         new Set(
-          participacoes.map((p) => p.id_participante).filter((id) => id != null)
-        )
+          participacoes
+            .map((p) => p.id_participante)
+            .filter((id) => id != null),
+        ),
       );
 
       if (idsParticipantes.length === 0) {
@@ -272,7 +276,6 @@ function Home() {
 
   return (
     <>
-      {/* Confetes cobrindo a tela quando ativado */}
       {showConfetti && (
         <div
           style={{
@@ -308,13 +311,6 @@ function Home() {
           <div className="top_bar">
             <div className="header">
               <ol id="top_page">
-                <li className="sponsor">
-                  <img src={Mondial} alt="Mondial" />
-                </li>
-                <li className="sponsor">
-                  <img src={Aiwa} alt="Aiwa" />
-                </li>
-
                 <li className="sponsor2">
                   {styleConfig.logo && (
                     <img
@@ -323,13 +319,6 @@ function Home() {
                       onClick={reset}
                     />
                   )}
-                </li>
-
-                <li className="sponsor">
-                  <img src={Bradesco} alt="Bradesco" />
-                </li>
-                <li className="sponsor">
-                  <img src={MPD} alt="MPD" />
                 </li>
               </ol>
             </div>
@@ -342,27 +331,25 @@ function Home() {
             <div className="random-container">
               <div className="random">
                 <ul className={drawer_n.length % 2 !== 0 ? "odd-items" : ""}>
-                  {drawer_n.map((nome, i) => {
-                    // Limita o nome para não quebrar layout
-                    const partes = nome.split(" ");
-                    const nomeResumido = partes.slice(0, 3).join(" ");
+                  {drawer_n.map((itemTexto, i) => {
+                    // Separa Nome e Prêmio para exibição
+                    const partes = itemTexto.split(" - ");
+                    const nomeCompleto = partes[0];
+                    const premio = partes[1] || "Sem prêmio";
 
-                    // Lógica para pegar o prêmio sequencial
-                    const indiceDoPremioParaEsteGanhador =
-                      indiceBrinde - drawer_n.length + i;
-                    const premioAtual = listaBrindes[
-                      indiceDoPremioParaEsteGanhador
-                    ]
-                      ? listaBrindes[indiceDoPremioParaEsteGanhador]
-                      : `Prêmio ${indiceDoPremioParaEsteGanhador + 1}`;
+                    // Limita o nome para não quebrar layout
+                    const nomeResumido = nomeCompleto
+                      .split(" ")
+                      .slice(0, 3)
+                      .join(" ");
 
                     return (
                       <div key={i} className="winner-wrapper">
-                        {/* 1. BOLINHA DA RODADA (NA ESQUERDA) */}
+                        {/* 1. BOLINHA DA RODADA */}
                         <div className="badge-rodada">{rodada}</div>
 
-                        {/* 2. NOME DO PRÊMIO (EM CIMA) */}
-                        <div className="prize-label">{premioAtual}</div>
+                        {/* 2. NOME DO PRÊMIO */}
+                        <div className="prize-label">{premio}</div>
 
                         {/* 3. CARD DO NOME */}
                         <li className="winner-card">{nomeResumido}</li>
@@ -398,7 +385,7 @@ function Home() {
             </div>
           </div>
 
-          {/* --- ÁREA DE INPUTS (NOMES E BRINDES) --- */}
+          {/* --- ÁREA DE INPUTS --- */}
           <div className="form_areas_container">
             {/* Input Nomes */}
             <div className="input-group">
