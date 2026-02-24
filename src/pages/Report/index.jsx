@@ -12,7 +12,7 @@ import {
 import { useStyle } from "../../Context/useStyle";
 import "./style.css";
 
-function Report() {
+function Report({ eventId }) {
   const API_URL = import.meta.env.VITE_API_URL;
   const { styleConfig } = useStyle();
 
@@ -21,32 +21,48 @@ function Report() {
   const [staffCount, setStaffCount] = useState("0");
   const [isSavingStaff, setIsSavingStaff] = useState(false);
 
-  // Carrega dados iniciais
+  // Link prefixado para voltar para a home certa
+  const linkPrefix = eventId === "default" ? "" : `/${eventId}`;
+
   useEffect(() => {
     // 1. Participantes
     axios
-      .get(`${API_URL}/arquivo/nomes.json`)
-      .then((res) => setNames(res.data))
+      .get(`${API_URL}/${eventId}/arquivo/nomes.json`)
+      .then((res) => {
+        // SEGURANÇA: Garante que é array
+        setNames(Array.isArray(res.data) ? res.data : []);
+      })
       .catch((err) => console.log(err));
 
-    // 2. Sorteados (Lê o arquivo de texto bruto para mostrar o histórico completo)
+    // 2. Sorteados
     axios
-      .get(`${API_URL}/relatorio`)
-      .then((res) => setDrawnList(res.data))
-      .catch((err) => console.log(err));
+      .get(`${API_URL}/${eventId}/relatorio`)
+      .then((res) => {
+        // SEGURANÇA CRÍTICA: Se vier null ou objeto, força array vazio
+        if (Array.isArray(res.data)) {
+          setDrawnList(res.data);
+        } else {
+          setDrawnList([]);
+        }
+      })
+      .catch((err) => {
+        console.log("Erro ao carregar relatório:", err);
+        setDrawnList([]); // Evita o erro .filter is not a function
+      });
 
     // 3. Staffs
     axios
-      .get(`${API_URL}/staffs`)
+      .get(`${API_URL}/${eventId}/staffs`)
       .then((res) => setStaffCount(res.data.quantidade))
       .catch((err) => console.log("Erro ao ler staffs", err));
-  }, [API_URL]);
+  }, [API_URL, eventId]);
 
-  // Salva staffs no backend
   const handleSaveStaffs = async () => {
     try {
       setIsSavingStaff(true);
-      await axios.post(`${API_URL}/staffs`, { quantidade: staffCount });
+      await axios.post(`${API_URL}/${eventId}/staffs`, {
+        quantidade: staffCount,
+      });
       setIsSavingStaff(false);
       alert("Número de Staffs atualizado!");
     } catch (error) {
@@ -56,19 +72,23 @@ function Report() {
   };
 
   const downloading = () => {
-    if (drawnList.length === 0) return alert("Nenhum nome sorteado ainda.");
-    window.location.href = `${API_URL}/relatorio/download`;
+    // Segurança também no botão de download
+    if (!Array.isArray(drawnList) || drawnList.length === 0)
+      return alert("Nenhum nome sorteado ainda.");
+    window.location.href = `${API_URL}/${eventId}/relatorio/download`;
   };
 
-  // Filtra apenas as linhas que são ganhadores (ignorando títulos de rodada para contagem)
-  const totalGanhadoresReais = drawnList.filter(
-    (l) => !l.includes("--- RODADA"),
-  ).length;
+  // SEGURANÇA AQUI: Verifica se é array antes de fazer o filter
+  const totalGanhadoresReais = Array.isArray(drawnList)
+    ? drawnList.filter(
+        (l) => typeof l === "string" && !l.includes("--- RODADA"),
+      ).length
+    : 0;
 
   return (
     <>
       <nav className="nav-bar">
-        <Link to={"/"}>
+        <Link to={`${linkPrefix}/`}>
           <FaArrowLeft size={20} className="arrow-icon" />
         </Link>
         <h1 className="nav-title">Relatório Geral</h1>
@@ -89,7 +109,6 @@ function Report() {
             <p>Painel de controle e exportação</p>
           </div>
 
-          {/* --- DASHBOARD DE ESTATÍSTICAS --- */}
           <div className="stats-grid">
             <div className="stat-card">
               <div className="icon-box blue">
@@ -133,16 +152,17 @@ function Report() {
 
           <div className="divider"></div>
 
-          {/* --- LISTA DE GANHADORES COM ROLAGEM --- */}
           <div className="list-section">
             <h3>Histórico de Sorteio</h3>
             <div className="scroll-box">
-              {drawnList.length === 0 ? (
+              {/* SEGURANÇA AQUI: Verifica array */}
+              {!Array.isArray(drawnList) || drawnList.length === 0 ? (
                 <p className="empty-msg">Nenhum sorteio realizado ainda.</p>
               ) : (
                 <ul>
                   {drawnList.map((linha, i) => {
-                    // Renderização condicional para Títulos de Rodada vs Nomes
+                    if (typeof linha !== "string") return null; // Proteção extra
+
                     if (linha.includes("--- RODADA")) {
                       return (
                         <li key={i} className="rodada-header">

@@ -9,24 +9,26 @@ import "./style.css";
 
 import logo from "../../assets/logo.png";
 
-function Style() {
+function Style({ eventId }) {
   const API_URL = import.meta.env.VITE_API_URL;
 
   // Configurador de estilo da página
 
   const { styleConfig, setStyleConfig } = useStyle();
 
+  const linkPrefix = eventId === "default" ? "" : `/${eventId}`;
+
   // Envia as configurações de estilo para a API
 
   useEffect(() => {
-    fetch(`${API_URL}/style`, {
+    fetch(`${API_URL}/${eventId}/style`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(styleConfig),
     });
-  }, [API_URL, styleConfig]);
+  }, [API_URL, styleConfig, eventId]);
 
   // Muda o valor das propriedades do estilo
 
@@ -53,7 +55,7 @@ function Style() {
   return (
     <>
       <nav className="nav-bar">
-        <Link to={"/"}>
+        <Link to={`${linkPrefix}/`}>
           <FaArrowLeft size={20} className="arrow-icon" />
         </Link>
         <h1 className="nav-title">Estilização do Sorteio</h1>
