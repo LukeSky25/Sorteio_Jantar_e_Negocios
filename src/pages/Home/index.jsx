@@ -50,6 +50,7 @@ function Home({ eventId }) {
   const [isVisiblePrizes, setIsVisiblePrizes] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [recycleConfetti, setRecycleConfetti] = useState(true);
+  const saveBrindesTimeout = useRef(null);
   const [windowDimension, setWindowDimension] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
@@ -165,20 +166,6 @@ function Home({ eventId }) {
     }
   }, [API_URL, eventId]);
 
-  const writeBrindes = async (e) => {
-    try {
-      if (e.key === "Enter") {
-        const linhas = textoBrindes
-          .split("\n")
-          .filter((item) => item.trim() !== "");
-        await axios.post(`${API_URL}/${eventId}/escrever-brindes`, linhas);
-        getBrindes();
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const getNames = useCallback(async () => {
     try {
       const res = await axios.get(`${API_URL}/${eventId}/arquivo/nomes.json`);
@@ -259,6 +246,16 @@ function Home({ eventId }) {
     setTextoBrindes(texto);
     const lista = texto.split("\n").filter((item) => item.trim() !== "");
     setListaBrindes(lista);
+
+    // Auto-save: Aguarda meio segundo após você parar de digitar e salva no backend
+    if (saveBrindesTimeout.current) clearTimeout(saveBrindesTimeout.current);
+    saveBrindesTimeout.current = setTimeout(async () => {
+      try {
+        await axios.post(`${API_URL}/${eventId}/escrever-brindes`, lista);
+      } catch (error) {
+        console.error("Erro ao salvar brindes:", error);
+      }
+    }, 500);
   };
 
   const fetchParticipantesUltimoEvento = useCallback(async () => {
@@ -561,7 +558,11 @@ function Home({ eventId }) {
                 value={quant}
                 onChange={(e) => setQuant(Number(e.target.value))}
               />
-              <button className="play_button2" onClick={name_drawer}>
+              <button
+                className="play_button2"
+                onClick={name_drawer}
+                disabled={loading}
+              >
                 Sortear Nomes{" "}
                 <span>
                   <FaPlay color="red" size={13} style={{ marginLeft: 5 }} />
@@ -616,8 +617,7 @@ function Home({ eventId }) {
                 className={`names_area ${isVisiblePrizes ? "visible" : "invisible"}`}
                 value={textoBrindes}
                 onChange={handleBrindesChange}
-                onKeyDown={writeBrindes}
-                placeholder="Cole a lista de BRINDES aqui..."
+                placeholder="Cole a lista de BRINDES aqui... (salva automaticamente)"
                 style={{ borderColor: "#ffd700" }}
               />
             </div>
