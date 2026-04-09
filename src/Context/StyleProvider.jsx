@@ -6,44 +6,39 @@ const defaultStyle = {
   color: "black",
   logo: "",
   backgroundType: "color",
-  backgroundValue: "#40e0d0",
+  backgroundValue: "#40e0d0", // Cor verde água padrão
 };
 
-// Recebe eventId via props (passado no main.jsx)
-export const StyleProvider = ({ children, eventId }) => {
+export const StyleProvider = ({ children }) => {
   const API_URL = import.meta.env.VITE_API_URL;
   const [styleConfig, setStyleConfig] = useState(defaultStyle);
 
   useEffect(() => {
     const fetchStyle = async () => {
       try {
-        const res = await fetch(`${API_URL}/${eventId}/style`);
+        const res = await fetch(`${API_URL}/style`);
         const data = await res.json();
 
-        // --- CORREÇÃO DE SEGURANÇA ---
-        // Verifica se 'data' é um objeto válido e não está vazio.
-        // Se vier null, undefined ou erro, usa o default.
+        // Verifica se veio um objeto válido.
+        // Faz um "merge" com o defaultStyle para evitar que a tela quebre caso falte alguma propriedade no JSON
         if (data && typeof data === "object" && !data.erro) {
-          setStyleConfig(data);
+          setStyleConfig({ ...defaultStyle, ...data });
         } else {
           setStyleConfig(defaultStyle);
         }
       } catch (error) {
         console.error("Erro ao carregar estilo:", error);
-        setStyleConfig(defaultStyle); // Fallback para evitar tela branca
+        setStyleConfig(defaultStyle); // Fallback em caso de erro na API
       }
     };
 
-    // Reseta para o padrão antes de buscar o novo (evita piscar estilo antigo)
     setStyleConfig(defaultStyle);
     fetchStyle();
-  }, [API_URL, eventId]);
+  }, [API_URL]);
 
   return (
-    <StyleContext.Provider value={{ styleConfig, setStyleConfig, eventId }}>
+    <StyleContext.Provider value={{ styleConfig, setStyleConfig }}>
       {children}
     </StyleContext.Provider>
   );
 };
-
-export default StyleProvider;

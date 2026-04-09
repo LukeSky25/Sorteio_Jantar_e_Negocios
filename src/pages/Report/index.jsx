@@ -8,11 +8,13 @@ import {
   FaGift,
   FaDownload,
   FaFloppyDisk,
+  FaCheck,
+  FaXmark,
 } from "react-icons/fa6";
 import { useStyle } from "../../Context/useStyle";
 import "./style.css";
 
-function Report({ eventId }) {
+function Report() {
   const API_URL = import.meta.env.VITE_API_URL;
   const { styleConfig } = useStyle();
 
@@ -21,24 +23,30 @@ function Report({ eventId }) {
   const [staffCount, setStaffCount] = useState("0");
   const [isSavingStaff, setIsSavingStaff] = useState(false);
 
-  // Link prefixado para voltar para a home certa
-  const linkPrefix = eventId === "default" ? "" : `/${eventId}`;
+  // --- ESTADO DO MODAL CUSTOMIZADO ---
+  const [modal, setModal] = useState({
+    isOpen: false,
+    message: "",
+    isError: false,
+  });
+
+  const closeModal = () => {
+    setModal({ isOpen: false, message: "", isError: false });
+  };
 
   useEffect(() => {
     // 1. Participantes
     axios
-      .get(`${API_URL}/${eventId}/arquivo/nomes.json`)
+      .get(`${API_URL}/arquivo/nomes.json`)
       .then((res) => {
-        // SEGURANÇA: Garante que é array
         setNames(Array.isArray(res.data) ? res.data : []);
       })
       .catch((err) => console.log(err));
 
     // 2. Sorteados
     axios
-      .get(`${API_URL}/${eventId}/relatorio`)
+      .get(`${API_URL}/relatorio`)
       .then((res) => {
-        // SEGURANÇA CRÍTICA: Se vier null ou objeto, força array vazio
         if (Array.isArray(res.data)) {
           setDrawnList(res.data);
         } else {
@@ -47,38 +55,52 @@ function Report({ eventId }) {
       })
       .catch((err) => {
         console.log("Erro ao carregar relatório:", err);
-        setDrawnList([]); // Evita o erro .filter is not a function
+        setDrawnList([]);
       });
 
     // 3. Staffs
     axios
-      .get(`${API_URL}/${eventId}/staffs`)
+      .get(`${API_URL}/staffs`)
       .then((res) => setStaffCount(res.data.quantidade))
       .catch((err) => console.log("Erro ao ler staffs", err));
-  }, [API_URL, eventId]);
+  }, [API_URL]);
 
   const handleSaveStaffs = async () => {
     try {
       setIsSavingStaff(true);
-      await axios.post(`${API_URL}/${eventId}/staffs`, {
+      await axios.post(`${API_URL}/staffs`, {
         quantidade: staffCount,
       });
       setIsSavingStaff(false);
-      alert("Número de Staffs atualizado!");
+      // Substituindo o alert antigo:
+      setModal({
+        isOpen: true,
+        message: "Número de Staffs atualizado com sucesso!",
+        isError: false,
+      });
     } catch (error) {
       console.error(error);
       setIsSavingStaff(false);
+      setModal({
+        isOpen: true,
+        message: "Erro ao salvar staffs. Verifique a conexão.",
+        isError: true,
+      });
     }
   };
 
   const downloading = () => {
-    // Segurança também no botão de download
-    if (!Array.isArray(drawnList) || drawnList.length === 0)
-      return alert("Nenhum nome sorteado ainda.");
-    window.location.href = `${API_URL}/${eventId}/relatorio/download`;
+    if (!Array.isArray(drawnList) || drawnList.length === 0) {
+      // Substituindo o alert antigo:
+      return setModal({
+        isOpen: true,
+        message: "Nenhum nome foi sorteado ainda para gerar o relatório.",
+        isError: true,
+      });
+    }
+    window.location.href = `${API_URL}/relatorio/download`;
   };
 
-  // SEGURANÇA AQUI: Verifica se é array antes de fazer o filter
   const totalGanhadoresReais = Array.isArray(drawnList)
     ? drawnList.filter(
         (l) => typeof l === "string" && !l.includes("--- RODADA"),
@@ -87,8 +109,26 @@ function Report({ eventId }) {
 
   return (
     <>
+      {/* --- RENDERIZAÇÃO DO MODAL --- */}
+      {modal.isOpen && (
+        <div className="report-modal-overlay">
+          <div
+            className={`report-modal-content ${modal.isError ? "modal-error" : "modal-success"}`}
+          >
+            <div className="report-modal-icon">
+              {modal.isError ? <FaXmark size={30} /> : <FaCheck size={30} />}
+            </div>
+            <h3>{modal.isError ? "Ops, Atenção!" : "Tudo Certo!"}</h3>
+            <p>{modal.message}</p>
+            <button onClick={closeModal} className="report-modal-btn">
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
+
       <nav className="nav-bar">
-        <Link to={`${linkPrefix}/`}>
+        <Link to="/">
           <FaArrowLeft size={20} className="arrow-icon" />
         </Link>
         <h1 className="nav-title">Relatório Geral</h1>
@@ -114,7 +154,7 @@ function Report({ eventId }) {
               <div className="icon-box blue">
                 <FaUsers />
               </div>
-              <div>
+              <div className="stat-info">
                 <h3>{names.length}</h3>
                 <p>Convidados</p>
               </div>
@@ -124,7 +164,7 @@ function Report({ eventId }) {
               <div className="icon-box green">
                 <FaGift />
               </div>
-              <div>
+              <div className="stat-info">
                 <h3>{totalGanhadoresReais}</h3>
                 <p>Sorteados</p>
               </div>
@@ -155,13 +195,12 @@ function Report({ eventId }) {
           <div className="list-section">
             <h3>Histórico de Sorteio</h3>
             <div className="scroll-box">
-              {/* SEGURANÇA AQUI: Verifica array */}
               {!Array.isArray(drawnList) || drawnList.length === 0 ? (
                 <p className="empty-msg">Nenhum sorteio realizado ainda.</p>
               ) : (
                 <ul>
                   {drawnList.map((linha, i) => {
-                    if (typeof linha !== "string") return null; // Proteção extra
+                    if (typeof linha !== "string") return null;
 
                     if (linha.includes("--- RODADA")) {
                       return (

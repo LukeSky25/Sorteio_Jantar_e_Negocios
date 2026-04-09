@@ -55,10 +55,8 @@
   right: 3%;
 }
 
-/* Logos com contorno branco e fundo transparente */
 .sponsor-box {
   background: transparent;
-
   border-radius: 15px;
   padding: 5px;
   box-shadow: none;
@@ -119,19 +117,17 @@ div.info {
   font-size: 20px;
   border-radius: 50px;
   border: 1px solid #ccc;
-  text-align: center; /* Centralização do texto */
+  text-align: center;
   padding: 0;
   color: #fff;
   background: rgba(192, 192, 192, 0.5);
   backdrop-filter: blur(10px);
   font-weight: 600;
   outline: none;
-  /* Compatibilidade */
   -moz-appearance: textfield;
   appearance: textfield;
 }
 
-/* Remove setinhas do input number */
 .form input[type="number"]::-webkit-outer-spin-button,
 .form input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -172,6 +168,8 @@ div.info {
   align-items: center;
   position: relative;
   margin: 0 20px;
+  width: 100%;
+  max-width: 600px;
 }
 
 .prize-label {
@@ -185,7 +183,7 @@ div.info {
   padding: 5px 20px;
   border-radius: 10px;
   white-space: nowrap;
-  max-width: 600px;
+  max-width: 90vw;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -207,10 +205,13 @@ div.info {
   text-align: center;
 }
 
+/* CARTÃO DO VENCEDOR AGORA COM FONTE MAIS GROSSA E NEGRITO */
 .winner-card {
-  width: 600px;
+  width: 100%;
+  max-width: 600px;
   height: 80px;
   font-size: 28px;
+  font-weight: bold; /* ADICIONADO AQUI */
   border-radius: 20px;
   background-color: aliceblue;
   text-align: center;
@@ -218,20 +219,52 @@ div.info {
   align-items: center;
   justify-content: center;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
   transition: 0.2s;
   box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.3);
+  padding: 0 15px; /* Adicionado para afastar das bordas */
 }
 
-/* Hover nos nomes (Restaurado) */
 .winner-card:hover {
   transition: 0.1s;
   font-size: 36px;
-  padding: 15px 35px;
   box-shadow: 10px 10px 5px 2px #1c1c5c;
   transform: scale(1.02);
+}
+
+.winner-name-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --- ESTILOS DO GATILHO SECRETO (DUPLO CLIQUE) --- */
+.clickable-card {
+  cursor: default; /* Ninguém vê que é clicável */
+  user-select: none; /* Impede seleção de texto ao dar 2 cliques */
+}
+
+.redrawing-anim {
+  background-color: #e0e0e0;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+  transform: scale(0.98);
+  transition: all 0.3s ease;
+}
+
+.redrawing-text {
+  color: #666;
+  font-style: italic;
+  font-weight: normal;
+  animation: pulseText 1s infinite alternate;
+}
+
+@keyframes pulseText {
+  0% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .random {
@@ -241,24 +274,13 @@ div.info {
 }
 
 .random ul {
-  display: grid;
-  grid-template-columns: repeat(2, auto);
-  gap: 60px 50px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
   justify-content: center;
   padding: 0;
   list-style: none;
-}
-
-.random ul:has(.winner-wrapper:nth-child(2)) {
-  justify-content: center;
-}
-.random ul:has(.winner-wrapper:nth-child(1):only-child) {
-  grid-template-columns: 1fr;
-  justify-content: center;
-}
-.random ul.odd-items .winner-wrapper:last-child {
-  grid-column: 1 / -1;
-  justify-self: center;
+  width: 100%;
 }
 
 /* --- INPUTS E BOTÕES --- */
@@ -275,6 +297,8 @@ div.info {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+  max-width: 350px;
 }
 
 .input-controls button {
@@ -291,7 +315,7 @@ div.info {
 }
 
 .names_area {
-  width: 350px;
+  width: 100%;
   font-size: 16px;
   padding: 10px;
   text-align: center;
@@ -342,7 +366,7 @@ div.info {
   list-style: none;
 }
 
-/* --- MODAL DE CONFIGURAÇÃO (NOVO) --- */
+/* --- MODAL DE CONFIGURAÇÃO DOS FIXOS (MANTIDO) --- */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -455,168 +479,7 @@ div.info {
   font-size: 16px;
 }
 
-/* =========================================
-   TEMA EXCLUSIVO: GOLDEN NIGHT 
-   (Só ativa se a classe .golden-theme estiver presente)
-   ========================================= */
-
-/* 1. Fundo Animado de Luxo (Preto e Dourado) */
-.golden-theme {
-  background: radial-gradient(ellipse at center, #1b1b1b 0%, #000000 100%);
-  color: #ffd700; /* Texto base dourado */
-}
-
-/* Partículas de ouro no fundo */
-.golden-theme::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image:
-    radial-gradient(#ffd700 1px, transparent 1px),
-    radial-gradient(#ffd700 1px, transparent 1px);
-  background-size: 50px 50px;
-  background-position:
-    0 0,
-    25px 25px;
-  opacity: 0.1;
-  pointer-events: none;
-  animation: goldDust 60s linear infinite;
-}
-
-@keyframes goldDust {
-  from {
-    background-position:
-      0 0,
-      25px 25px;
-  }
-  to {
-    background-position:
-      100px 100px,
-      125px 125px;
-  }
-}
-
-/* 2. Título (Edição) */
-.golden-theme .edition {
-  text-transform: uppercase;
-  letter-spacing: 5px;
-  background: linear-gradient(
-    45deg,
-    #bf953f,
-    #fcf6ba,
-    #b38728,
-    #fbf5b7,
-    #aa771c
-  );
-  /* Propriedade padrão para compatibilidade + prefixo */
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-size: 45px;
-  text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-}
-
-/* 3. Card do Ganhador (Estilo Hollywood) */
-.golden-theme .winner-card {
-  background: rgba(0, 0, 0, 0.8);
-  border: 2px solid #b38728;
-  color: #fff;
-  box-shadow:
-    0 0 10px #b38728,
-    inset 0 0 20px rgba(179, 135, 40, 0.2);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
-
-.golden-theme .winner-card:hover {
-  transform: scale(1.05);
-  box-shadow:
-    0 0 20px #ffd700,
-    inset 0 0 30px rgba(255, 215, 0, 0.4);
-  background: #000;
-  border-color: #ffd700;
-}
-
-/* 4. Prêmio (Etiqueta Dourada) */
-.golden-theme .prize-label {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(179, 135, 40, 0.3),
-    transparent
-  );
-  color: #fcf6ba;
-  text-shadow: 0 2px 2px #000;
-  font-size: 22px;
-  border-bottom: 1px solid #b38728;
-  padding-bottom: 5px;
-}
-
-/* 5. Badge da Rodada */
-.golden-theme .badge-rodada {
-  background: #000;
-  border: 2px solid #ffd700;
-  color: #ffd700;
-  box-shadow: 0 0 10px #ffd700;
-}
-
-/* 6. Inputs e Botões */
-.golden-theme .form input[type="number"] {
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid #b38728;
-  color: #ffd700;
-  font-size: 24px;
-}
-
-.golden-theme .play_button2 {
-  background: linear-gradient(180deg, #bf953f 0%, #aa771c 100%);
-  border: 1px solid #fcf6ba;
-  color: #000;
-  font-weight: 800;
-  text-transform: uppercase;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-}
-
-.golden-theme .play_button2:hover {
-  background: linear-gradient(180deg, #fcf6ba 0%, #bf953f 100%);
-  transform: translateY(-2px);
-}
-
-/* 7. Áreas de Lista */
-.golden-theme .names_area {
-  background: rgba(0, 0, 0, 0.9);
-  border: 2px solid #b38728;
-  color: #fcf6ba;
-  font-family: monospace;
-}
-
-.golden-theme .input-controls button {
-  background: #333;
-  border: 1px solid #555;
-}
-
-/* 8. Botões de Rodapé */
-.golden-theme .buttons button {
-  background: transparent;
-  border: 1px solid #b38728;
-  color: #b38728;
-  transition: 0.3s;
-}
-
-.golden-theme .buttons button a {
-  color: #b38728 !important;
-}
-.golden-theme .buttons button:hover {
-  background: #b38728;
-}
-.golden-theme .buttons button:hover a {
-  color: #000 !important;
-}
-
-/* MEDIA QUERIES */
+/* MEDIA QUERIES PARA RESPONSIVIDADE */
 @media (max-width: 1500px) {
   .sponsor-mini {
     width: 100px;
@@ -644,7 +507,17 @@ div.info {
   .header img {
     width: 80%;
   }
+  .form_areas_container {
+    flex-direction: column;
+    align-items: center;
+  }
   .winner-card {
-    width: 300px;
+    font-size: 22px;
+  }
+  .winner-card:hover {
+    font-size: 24px;
+  }
+  .buttons {
+    gap: 50px;
   }
 }

@@ -30,12 +30,9 @@ import logoClaroTv from "../../assets/claro_tv.jpg";
 import logoAlphaChannel from "../../assets/alpha_channel.jpg";
 import logoLed10 from "../../assets/led10.png";
 
-const PLACEHOLDER = "https://placehold.co/150x150?text=Logo";
-
-function Home({ eventId }) {
+function Home() {
   const API_URL = import.meta.env.VITE_API_URL;
 
-  // Estados principais
   const [names, setNames] = useState([]);
   const [drawer_n, setDrawer_n] = useState([]);
   const [quant, setQuant] = useState(1);
@@ -51,12 +48,15 @@ function Home({ eventId }) {
   const [showConfetti, setShowConfetti] = useState(false);
   const [recycleConfetti, setRecycleConfetti] = useState(true);
   const saveBrindesTimeout = useRef(null);
+
+  // Controle de qual index está sendo ressorteado no momento (Gatilho Secreto)
+  const [redrawingIndex, setRedrawingIndex] = useState(null);
+
   const [windowDimension, setWindowDimension] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
   });
 
-  // --- CONFIGURAÇÃO DE VENCEDORES FIXOS ---
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [fixedWinners, setFixedWinners] = useState([]);
   const [newFixedRound, setNewFixedRound] = useState("");
@@ -66,7 +66,6 @@ function Home({ eventId }) {
   const textAreaRef = useRef(null);
   const { styleConfig } = useStyle();
 
-  // --- PATROCINADORES ---
   const sponsorConfig = useMemo(() => {
     return {
       master: [logoBradesco, logoBraspress, logoMondial, logoAiwa],
@@ -83,7 +82,6 @@ function Home({ eventId }) {
     return sponsorConfig.supporters;
   }, [rodada, sponsorConfig]);
 
-  // --- EFEITOS E HANDLERS ---
   const detectSize = () => {
     setWindowDimension({
       width: window.innerWidth,
@@ -96,21 +94,19 @@ function Home({ eventId }) {
     return () => window.removeEventListener("resize", detectSize);
   }, []);
 
-  // Busca lista de fixos do back
   const fetchFixedWinners = useCallback(async () => {
     try {
-      const res = await axios.get(`${API_URL}/${eventId}/vencedores-fixos`);
+      const res = await axios.get(`${API_URL}/vencedores-fixos`);
       if (Array.isArray(res.data)) setFixedWinners(res.data);
     } catch (error) {
       console.error("Erro ao buscar vencedores fixos:", error);
     }
-  }, [API_URL, eventId]);
+  }, [API_URL]);
 
   const saveFixedWinners = async (novaLista) => {
     try {
-      // Ordena por rodada para ficar organizado
       novaLista.sort((a, b) => a.rodada - b.rodada);
-      await axios.post(`${API_URL}/${eventId}/vencedores-fixos`, novaLista);
+      await axios.post(`${API_URL}/vencedores-fixos`, novaLista);
       setFixedWinners(novaLista);
     } catch (error) {
       console.error(error);
@@ -141,7 +137,6 @@ function Home({ eventId }) {
     saveFixedWinners(novaLista);
   };
 
-  // Atalho CTRL + M
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.ctrlKey && e.key === "m") {
@@ -153,10 +148,9 @@ function Home({ eventId }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // --- FUNÇÕES DE DADOS ---
   const getBrindes = useCallback(async () => {
     try {
-      const res = await axios.get(`${API_URL}/${eventId}/lista-brindes`);
+      const res = await axios.get(`${API_URL}/lista-brindes`);
       if (Array.isArray(res.data)) {
         setListaBrindes(res.data);
         setTextoBrindes(res.data.join("\n"));
@@ -164,23 +158,23 @@ function Home({ eventId }) {
     } catch (error) {
       console.error("Erro brindes:", error);
     }
-  }, [API_URL, eventId]);
+  }, [API_URL]);
 
   const getNames = useCallback(async () => {
     try {
-      const res = await axios.get(`${API_URL}/${eventId}/arquivo/nomes.json`);
+      const res = await axios.get(`${API_URL}/arquivo/nomes.json`);
       if (Array.isArray(res.data)) setNames(res.data);
     } catch (error) {
       console.error("Erro nomes:", error);
     }
-  }, [API_URL, eventId]);
+  }, [API_URL]);
 
   const reset = async () => {
     try {
       setRodada(0);
       setDrawer_n([]);
       setShowConfetti(false);
-      await axios.get(`${API_URL}/${eventId}/reset`);
+      await axios.get(`${API_URL}/reset`);
       getNames();
       getBrindes();
     } catch (error) {
@@ -196,19 +190,15 @@ function Home({ eventId }) {
 
       const novaRodada = rodada + 1;
 
-      // O Backend decide se é fixo ou aleatório
-      const res = await axios.get(`${API_URL}/${eventId}/sortear/${quant}`);
+      const res = await axios.get(`${API_URL}/sortear/${quant}`);
       const sorteadosFormatados = res.data.sorteados;
 
       setDrawer_n(sorteadosFormatados);
 
-      // Atualiza listas para remover quem saiu
-      const novosNomes = await axios.get(
-        `${API_URL}/${eventId}/arquivo/nomes.json`,
-      );
+      const novosNomes = await axios.get(`${API_URL}/arquivo/nomes.json`);
       setNames(novosNomes.data);
 
-      await axios.post(`${API_URL}/${eventId}/relatorio/escrever`, {
+      await axios.post(`${API_URL}/relatorio/escrever`, {
         nomes: sorteadosFormatados,
         rodada: novaRodada,
       });
@@ -229,9 +219,34 @@ function Home({ eventId }) {
     }
   };
 
+  // --- NOVA FUNÇÃO RESSORTEAR INVISÍVEL (DOUBLE CLICK) ---
+  const handleRedrawSecret = async (index, textoAntigo) => {
+    try {
+      setRedrawingIndex(index); // Ativa animação de "Ressorteando..." no cartão
+
+      const res = await axios.post(`${API_URL}/ressortear`, {
+        textoAntigo: textoAntigo,
+      });
+
+      // Atualiza apenas este cartão específico
+      const novosSorteados = [...drawer_n];
+      novosSorteados[index] = res.data.novoTexto;
+      setDrawer_n(novosSorteados);
+
+      // Atualiza a lista geral de nomes
+      const novosNomes = await axios.get(`${API_URL}/arquivo/nomes.json`);
+      setNames(novosNomes.data);
+
+      setRedrawingIndex(null); // Finaliza animação
+    } catch (error) {
+      alert(error.response?.data?.mensagem || "Erro ao ressortear.");
+      setRedrawingIndex(null);
+    }
+  };
+
   const getList = useCallback(async () => {
     try {
-      const res = await axios.get(`${API_URL}/${eventId}/lista`);
+      const res = await axios.get(`${API_URL}/lista`);
       if (textAreaRef.current)
         textAreaRef.current.value = Array.isArray(res.data)
           ? res.data.join("\n")
@@ -239,7 +254,7 @@ function Home({ eventId }) {
     } catch (error) {
       console.error(error);
     }
-  }, [API_URL, eventId]);
+  }, [API_URL]);
 
   const handleBrindesChange = (e) => {
     const texto = e.target.value;
@@ -247,11 +262,10 @@ function Home({ eventId }) {
     const lista = texto.split("\n").filter((item) => item.trim() !== "");
     setListaBrindes(lista);
 
-    // Auto-save: Aguarda meio segundo após você parar de digitar e salva no backend
     if (saveBrindesTimeout.current) clearTimeout(saveBrindesTimeout.current);
     saveBrindesTimeout.current = setTimeout(async () => {
       try {
-        await axios.post(`${API_URL}/${eventId}/escrever-brindes`, lista);
+        await axios.post(`${API_URL}/escrever-brindes`, lista);
       } catch (error) {
         console.error("Erro ao salvar brindes:", error);
       }
@@ -304,15 +318,13 @@ function Home({ eventId }) {
     }
   }, []);
 
-  // --- CARREGAR DADOS INICIAIS ---
   useEffect(() => {
     getNames();
     getList();
     getBrindes();
     fetchParticipantesUltimoEvento();
-    fetchFixedWinners(); // Carrega configuração
+    fetchFixedWinners();
   }, [
-    eventId,
     getNames,
     getList,
     getBrindes,
@@ -325,10 +337,7 @@ function Home({ eventId }) {
       if (e.key === "Enter") {
         const textArea = document.querySelector("#list");
         const lines = textArea.value.split("\n").filter(Boolean);
-        const res = await axios.post(
-          `${API_URL}/${eventId}/escrever/lista.txt`,
-          lines,
-        );
+        const res = await axios.post(`${API_URL}/escrever/lista.txt`, lines);
         reset();
         return res;
       }
@@ -337,11 +346,9 @@ function Home({ eventId }) {
     }
   };
 
-  const linkPrefix = eventId === "default" ? "" : `/${eventId}`;
-
   return (
     <>
-      {/* --- MODAL DE CONFIGURAÇÃO DE VENCEDORES --- */}
+      {/* MODAL CONFIGURAÇÃO FIXOS (SOMENTE VISÍVEL COM CTRL+M) */}
       {showConfigModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -363,8 +370,6 @@ function Home({ eventId }) {
                   style={{ width: "80px" }}
                   title="Número da Rodada"
                 />
-
-                {/* Datalist para sugerir nomes da lista */}
                 <input
                   list="sugestoes-nomes"
                   type="text"
@@ -378,7 +383,6 @@ function Home({ eventId }) {
                   ))}
                 </datalist>
 
-                {/* Datalist para sugerir prêmios */}
                 <input
                   list="sugestoes-premios"
                   type="text"
@@ -454,39 +458,32 @@ function Home({ eventId }) {
       )}
 
       <section
-        className={`full-background ${eventId === "golden-night" ? "golden-theme" : ""}`}
+        className="full-background"
         style={{
           background:
-            // Se for Golden Night e não tiver imagem de fundo definida, usa o padrão do tema CSS
-            eventId === "golden-night" &&
-            styleConfig.backgroundType === "color" &&
-            styleConfig.backgroundValue === "#40e0d0"
-              ? null
-              : styleConfig.backgroundType === "color"
-                ? styleConfig.backgroundValue
-                : `url(${styleConfig.backgroundValue})`,
+            styleConfig.backgroundType === "color"
+              ? styleConfig.backgroundValue
+              : `url(${styleConfig.backgroundValue})`,
         }}
       >
         <main className="container">
           <div className="top_bar">
-            {eventId === "default" && (
-              <div className="sponsors-col left">
-                <div className="sponsor-box">
-                  <img
-                    src={currentSponsors[0]}
-                    className="sponsor-mini"
-                    alt="Patrocinador"
-                  />
-                </div>
-                <div className="sponsor-box">
-                  <img
-                    src={currentSponsors[1]}
-                    className="sponsor-mini"
-                    alt="Patrocinador"
-                  />
-                </div>
+            <div className="sponsors-col left">
+              <div className="sponsor-box">
+                <img
+                  src={currentSponsors[0]}
+                  className="sponsor-mini"
+                  alt="Patrocinador"
+                />
               </div>
-            )}
+              <div className="sponsor-box">
+                <img
+                  src={currentSponsors[1]}
+                  className="sponsor-mini"
+                  alt="Patrocinador"
+                />
+              </div>
+            </div>
 
             <div className="header">
               {styleConfig.logo && (
@@ -498,24 +495,22 @@ function Home({ eventId }) {
               )}
             </div>
 
-            {eventId === "default" && (
-              <div className="sponsors-col right">
-                <div className="sponsor-box">
-                  <img
-                    src={currentSponsors[2]}
-                    className="sponsor-mini"
-                    alt="Patrocinador"
-                  />
-                </div>
-                <div className="sponsor-box">
-                  <img
-                    src={currentSponsors[3]}
-                    className="sponsor-mini"
-                    alt="Patrocinador"
-                  />
-                </div>
+            <div className="sponsors-col right">
+              <div className="sponsor-box">
+                <img
+                  src={currentSponsors[2]}
+                  className="sponsor-mini"
+                  alt="Patrocinador"
+                />
               </div>
-            )}
+              <div className="sponsor-box">
+                <img
+                  src={currentSponsors[3]}
+                  className="sponsor-mini"
+                  alt="Patrocinador"
+                />
+              </div>
+            </div>
           </div>
 
           {loading ? (
@@ -536,7 +531,23 @@ function Home({ eventId }) {
                       <div key={i} className="winner-wrapper">
                         <div className="badge-rodada">{rodada}</div>
                         <div className="prize-label">{premio}</div>
-                        <li className="winner-card">{nomeResumido}</li>
+
+                        {/* CARTÃO COM GATILHO DE DUPLO CLIQUE SECRETAMENTE INVISÍVEL */}
+                        <li
+                          className={`winner-card clickable-card ${redrawingIndex === i ? "redrawing-anim" : ""}`}
+                          onDoubleClick={() => handleRedrawSecret(i, itemTexto)}
+                          title="Duplo clique rápido para ressortear"
+                        >
+                          {redrawingIndex === i ? (
+                            <span className="winner-name-text redrawing-text">
+                              Ressorteando...
+                            </span>
+                          ) : (
+                            <span className="winner-name-text">
+                              {nomeResumido}
+                            </span>
+                          )}
+                        </li>
                       </div>
                     );
                   })}
@@ -625,10 +636,10 @@ function Home({ eventId }) {
 
           <div className="buttons">
             <button id="report_b">
-              <Link to={`${linkPrefix}/report`}>Relatório</Link>
+              <Link to="/report">Relatório</Link>
             </button>
             <button id="style_b">
-              <Link to={`${linkPrefix}/style`}>Estilo</Link>
+              <Link to="/style">Estilo</Link>
             </button>
           </div>
 
