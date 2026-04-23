@@ -17,18 +17,22 @@ import ReactConfetti from "react-confetti";
 import "./style.css";
 
 // Imagens Patrocinadores
-import logoBradesco from "../../assets/bradesco.jpg";
-import logoBraspress from "../../assets/braspress.jpeg";
-import logoMondial from "../../assets/mondial.jpg";
-import logoAiwa from "../../assets/aiwa.jpg";
-import logoSolumar from "../../assets/solumar.jpeg";
-import logoDaTerrinha from "../../assets/daterrinha.jpeg";
-import logoCgtech from "../../assets/cgtech.jpeg";
-import logoLaSerenissima from "../../assets/la_serenissima.jpeg";
-import logoRevistaViva from "../../assets/revistaviva.jpg";
-import logoClaroTv from "../../assets/claro_tv.jpg";
-import logoAlphaChannel from "../../assets/alpha_channel.jpg";
+import logoBradesco from "../../assets/bradesco.png";
+import logoBraspress from "../../assets/braspress.png";
+import logoMondial from "../../assets/mondial.png";
+import logoAiwa from "../../assets/aiwa.png";
+import logoSolumar from "../../assets/solumar.png";
+import logoDaTerrinha from "../../assets/da_terrinha.png";
+import logoCgtech from "../../assets/cgtech.png";
+import logoLaSerenissima from "../../assets/la_serenissima.png";
+import logoRevistaViva from "../../assets/revista_viva.png";
+import logoClaroTv from "../../assets/claro_tv.png";
+import logoAlphaChannel from "../../assets/alpha_channel.png";
 import logoLed10 from "../../assets/led10.png";
+import logoOba from "../../assets/oba.png";
+import logoArea from "../../assets/area.png";
+import logoCompet from "../../assets/compet.png";
+import logoEcoville from "../../assets/ecoville.png";
 
 function Home() {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -43,13 +47,15 @@ function Home() {
   const [rodada, setRodada] = useState(0);
   const [listaBrindes, setListaBrindes] = useState([]);
   const [textoBrindes, setTextoBrindes] = useState("");
+  const [premiosPorRodada, setPremiosPorRodada] = useState({});
+
   const [isVisibleNames, setIsVisibleNames] = useState(false);
   const [isVisiblePrizes, setIsVisiblePrizes] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [recycleConfetti, setRecycleConfetti] = useState(true);
-  const saveBrindesTimeout = useRef(null);
 
-  // Controle de qual index está sendo ressorteado no momento (Gatilho Secreto)
+  const [spinners, setSpinners] = useState([]);
+  const saveBrindesTimeout = useRef(null);
   const [redrawingIndex, setRedrawingIndex] = useState(null);
 
   const [windowDimension, setWindowDimension] = useState({
@@ -63,23 +69,31 @@ function Home() {
   const [newFixedName, setNewFixedName] = useState("");
   const [newFixedPrize, setNewFixedPrize] = useState("");
 
+  const [isPrizeDropdownOpen, setIsPrizeDropdownOpen] = useState(false);
+  const [rodadasDisponiveis, setRodadasDisponiveis] = useState([]);
+
   const textAreaRef = useRef(null);
   const { styleConfig } = useStyle();
 
   const sponsorConfig = useMemo(() => {
     return {
       master: [logoBradesco, logoBraspress, logoMondial, logoAiwa],
-      minor: [logoSolumar, logoDaTerrinha, logoCgtech, logoLaSerenissima],
+      minor: [logoLaSerenissima, logoDaTerrinha, logoCgtech, logoEcoville],
       supporters: [logoRevistaViva, logoClaroTv, logoAlphaChannel, logoLed10],
+      novosPatrocinadores: [logoSolumar, logoOba, logoArea, logoCompet],
     };
   }, []);
 
   const currentSponsors = useMemo(() => {
     if (rodada === 0) return sponsorConfig.master;
-    const ciclo = (rodada - 1) % 4;
-    if (ciclo < 2) return sponsorConfig.master;
-    if (ciclo === 2) return sponsorConfig.minor;
-    return sponsorConfig.supporters;
+
+    // 2. MUDAMOS O MÓDULO DE 4 PARA 5 (Para incluir o novo grupo no ciclo)
+    const ciclo = (rodada - 1) % 5;
+
+    if (ciclo < 2) return sponsorConfig.master; // Rodadas 1 e 2 -> Master
+    if (ciclo === 2) return sponsorConfig.minor; // Rodada 3 -> Minor
+    if (ciclo === 3) return sponsorConfig.supporters; // Rodada 4 -> Supporters
+    return sponsorConfig.novosPatrocinadores; // Rodada 5 -> Nova Leva (e depois recomeça)
   }, [rodada, sponsorConfig]);
 
   const detectSize = () => {
@@ -119,7 +133,7 @@ function Home() {
       return alert("Preencha todos os campos!");
 
     const newItem = {
-      rodada: parseInt(newFixedRound),
+      rodada: parseInt(newFixedRound, 10),
       nome: newFixedName,
       premio: newFixedPrize,
     };
@@ -139,7 +153,7 @@ function Home() {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.ctrlKey && e.key === "m") {
+      if (e.ctrlKey && e.key.toLowerCase() === "m") {
         e.preventDefault();
         setShowConfigModal((prev) => !prev);
       }
@@ -147,6 +161,40 @@ function Home() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  useEffect(() => {
+    const linhas = textoBrindes
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l !== "");
+
+    const obj = {};
+    let currentRound = 0;
+
+    linhas.forEach((linha) => {
+      if (linha.startsWith("-") || linha.startsWith("=")) {
+        const match = linha.match(/\d+/);
+        if (match) {
+          currentRound = parseInt(match[0], 10);
+        } else {
+          currentRound++;
+        }
+      } else {
+        if (currentRound === 0) currentRound = 1;
+        if (!obj[currentRound]) {
+          obj[currentRound] = [];
+        }
+        obj[currentRound].push(linha);
+      }
+    });
+
+    setPremiosPorRodada(obj);
+
+    const disponiveis = Object.keys(obj)
+      .map(Number)
+      .sort((a, b) => a - b);
+    setRodadasDisponiveis(disponiveis);
+  }, [textoBrindes]);
 
   const getBrindes = useCallback(async () => {
     try {
@@ -182,34 +230,56 @@ function Home() {
     }
   };
 
+  // Animação de Roleta dos Nomes
+  useEffect(() => {
+    let interval;
+    if (loading && names.length > 0) {
+      interval = setInterval(() => {
+        const randomNames = Array.from({ length: quant }).map(() => {
+          const randomIndex = Math.floor(Math.random() * names.length);
+          const nomeSorteio = names[randomIndex]?.nome || "Sorteando...";
+          return nomeSorteio.split(" ").slice(0, 2).join(" ");
+        });
+        setSpinners(randomNames);
+      }, 70);
+    }
+    return () => clearInterval(interval);
+  }, [loading, names, quant]);
+
   const name_drawer = async () => {
     try {
+      if (quant > names.length && names.length > 0) {
+        alert("A quantidade solicitada é maior que o número de nomes!");
+        return;
+      }
+
       setLoading(true);
       setShowConfetti(false);
       setRecycleConfetti(true);
+      setDrawer_n([]);
+      setSpinners(Array(quant).fill("Preparando..."));
 
       const novaRodada = rodada + 1;
-
       const res = await axios.get(`${API_URL}/sortear/${quant}`);
       const sorteadosFormatados = res.data.sorteados;
 
-      setDrawer_n(sorteadosFormatados);
+      setTimeout(async () => {
+        setDrawer_n(sorteadosFormatados);
+        const novosNomes = await axios.get(`${API_URL}/arquivo/nomes.json`);
+        setNames(novosNomes.data);
 
-      const novosNomes = await axios.get(`${API_URL}/arquivo/nomes.json`);
-      setNames(novosNomes.data);
+        await axios.post(`${API_URL}/relatorio/escrever`, {
+          nomes: sorteadosFormatados,
+          rodada: novaRodada,
+        });
 
-      await axios.post(`${API_URL}/relatorio/escrever`, {
-        nomes: sorteadosFormatados,
-        rodada: novaRodada,
-      });
+        setRodada(novaRodada);
+        setLoading(false);
+        setShowConfetti(true);
 
-      setRodada(novaRodada);
-      setLoading(false);
-      setShowConfetti(true);
-      setRecycleConfetti(true);
-
-      setTimeout(() => setRecycleConfetti(false), 2000);
-      setTimeout(() => setShowConfetti(false), 10000);
+        setTimeout(() => setRecycleConfetti(false), 2000);
+        setTimeout(() => setShowConfetti(false), 10000);
+      }, 2500);
     } catch (error) {
       const msg =
         error.response?.data?.mensagem ||
@@ -219,25 +289,21 @@ function Home() {
     }
   };
 
-  // --- NOVA FUNÇÃO RESSORTEAR INVISÍVEL (DOUBLE CLICK) ---
   const handleRedrawSecret = async (index, textoAntigo) => {
     try {
-      setRedrawingIndex(index); // Ativa animação de "Ressorteando..." no cartão
+      setRedrawingIndex(index);
+      const res = await axios.post(`${API_URL}/ressortear`, { textoAntigo });
 
-      const res = await axios.post(`${API_URL}/ressortear`, {
-        textoAntigo: textoAntigo,
-      });
+      setTimeout(async () => {
+        const novosSorteados = [...drawer_n];
+        novosSorteados[index] = res.data.novoTexto;
+        setDrawer_n(novosSorteados);
 
-      // Atualiza apenas este cartão específico
-      const novosSorteados = [...drawer_n];
-      novosSorteados[index] = res.data.novoTexto;
-      setDrawer_n(novosSorteados);
+        const novosNomes = await axios.get(`${API_URL}/arquivo/nomes.json`);
+        setNames(novosNomes.data);
 
-      // Atualiza a lista geral de nomes
-      const novosNomes = await axios.get(`${API_URL}/arquivo/nomes.json`);
-      setNames(novosNomes.data);
-
-      setRedrawingIndex(null); // Finaliza animação
+        setRedrawingIndex(null);
+      }, 1500);
     } catch (error) {
       alert(error.response?.data?.mensagem || "Erro ao ressortear.");
       setRedrawingIndex(null);
@@ -337,18 +403,44 @@ function Home() {
       if (e.key === "Enter") {
         const textArea = document.querySelector("#list");
         const lines = textArea.value.split("\n").filter(Boolean);
-        const res = await axios.post(`${API_URL}/escrever/lista.txt`, lines);
+        await axios.post(`${API_URL}/escrever/lista.txt`, lines);
         reset();
-        return res;
       }
     } catch (error) {
       console.error(error);
     }
   };
 
+  // LÓGICA DE BUSCA RESTRITA À RODADA SELECIONADA
+  const getSortedPrizes = () => {
+    if (!newFixedRound) return [];
+
+    const premiosBase = premiosPorRodada[Number(newFixedRound)] || [];
+    const search = newFixedPrize.toLowerCase().trim();
+
+    if (!search) return premiosBase;
+
+    const matches = premiosBase.filter((p) => p.toLowerCase().includes(search));
+
+    return matches.sort((a, b) => {
+      const aLow = a.toLowerCase();
+      const bLow = b.toLowerCase();
+      const aStarts = aLow.startsWith(search);
+      const bStarts = bLow.startsWith(search);
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+      return 0;
+    });
+  };
+
+  const sortedPrizes = getSortedPrizes();
+
+  const winnersListFiltered = fixedWinners.filter(
+    (f) => !newFixedRound || f.rodada === Number(newFixedRound),
+  );
+
   return (
     <>
-      {/* MODAL CONFIGURAÇÃO FIXOS (SOMENTE VISÍVEL COM CTRL+M) */}
       {showConfigModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -362,18 +454,37 @@ function Home() {
 
             <div className="modal-body">
               <div className="add-form">
-                <input
-                  type="number"
-                  placeholder="Rodada"
+                <select
                   value={newFixedRound}
-                  onChange={(e) => setNewFixedRound(e.target.value)}
-                  style={{ width: "80px" }}
-                  title="Número da Rodada"
-                />
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setNewFixedRound(val);
+                    if (val !== "") {
+                      const prs = premiosPorRodada[Number(val)];
+                      setNewFixedPrize(prs && prs.length > 0 ? prs[0] : "");
+                    } else {
+                      setNewFixedPrize("");
+                    }
+                  }}
+                  className="select-rodada"
+                  style={{
+                    padding: "8px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                  }}
+                >
+                  <option value="">Rodada...</option>
+                  {rodadasDisponiveis.map((r) => (
+                    <option key={r} value={r}>
+                      Rodada {r}
+                    </option>
+                  ))}
+                </select>
+
                 <input
-                  list="sugestoes-nomes"
                   type="text"
                   placeholder="Nome do Vencedor"
+                  list="sugestoes-nomes"
                   value={newFixedName}
                   onChange={(e) => setNewFixedName(e.target.value)}
                 />
@@ -383,18 +494,72 @@ function Home() {
                   ))}
                 </datalist>
 
-                <input
-                  list="sugestoes-premios"
-                  type="text"
-                  placeholder="Prêmio"
-                  value={newFixedPrize}
-                  onChange={(e) => setNewFixedPrize(e.target.value)}
-                />
-                <datalist id="sugestoes-premios">
-                  {listaBrindes.map((b, i) => (
-                    <option key={i} value={b} />
-                  ))}
-                </datalist>
+                <div style={{ position: "relative", flex: 1 }}>
+                  <input
+                    type="text"
+                    placeholder={
+                      newFixedRound
+                        ? "Escolha o prêmio..."
+                        : "Selecione a rodada primeiro"
+                    }
+                    value={newFixedPrize}
+                    onChange={(e) => {
+                      setNewFixedPrize(e.target.value);
+                      setIsPrizeDropdownOpen(true);
+                    }}
+                    onFocus={() => setIsPrizeDropdownOpen(true)}
+                    onBlur={() =>
+                      setTimeout(() => setIsPrizeDropdownOpen(false), 200)
+                    }
+                    disabled={!newFixedRound}
+                    style={{ width: "100%" }}
+                  />
+                  {isPrizeDropdownOpen && sortedPrizes.length > 0 && (
+                    <ul
+                      className="gn-custom-dropdown"
+                      style={{
+                        position: "absolute",
+                        top: "100%",
+                        left: 0,
+                        right: 0,
+                        background: "#fff",
+                        border: "1px solid #ccc",
+                        maxHeight: "150px",
+                        overflowY: "auto",
+                        zIndex: 10,
+                        listStyle: "none",
+                        padding: 0,
+                        margin: 0,
+                        color: "#333",
+                        textAlign: "left",
+                      }}
+                    >
+                      {sortedPrizes.map((premio, idx) => (
+                        <li
+                          key={idx}
+                          onMouseDown={() => {
+                            setNewFixedPrize(premio);
+                            setIsPrizeDropdownOpen(false);
+                          }}
+                          style={{
+                            padding: "8px",
+                            cursor: "pointer",
+                            borderBottom: "1px solid #eee",
+                          }}
+                          onMouseOver={(e) =>
+                            (e.currentTarget.style.backgroundColor = "#f0f0f0")
+                          }
+                          onMouseOut={(e) =>
+                            (e.currentTarget.style.backgroundColor =
+                              "transparent")
+                          }
+                        >
+                          {premio}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
 
                 <button onClick={handleAddFixedWinner} className="add-btn">
                   <FaPlus />
@@ -403,21 +568,25 @@ function Home() {
 
               <div className="list-container">
                 <ul className="fixed-list">
-                  {fixedWinners.map((item, index) => (
-                    <li key={index}>
-                      <span className="fixed-info">
-                        <strong>Rodada {item.rodada}:</strong> {item.nome}
-                      </span>
-                      <span className="fixed-prize">🏆 {item.premio}</span>
-                      <button
-                        onClick={() => handleRemoveFixedWinner(index)}
-                        className="trash-btn"
-                      >
-                        <FaTrash />
-                      </button>
-                    </li>
-                  ))}
-                  {fixedWinners.length === 0 && (
+                  {winnersListFiltered.map((item) => {
+                    // Acha o index real no array principal para deletar o item certo
+                    const realIndex = fixedWinners.indexOf(item);
+                    return (
+                      <li key={realIndex}>
+                        <span className="fixed-info">
+                          <strong>Rodada {item.rodada}:</strong> {item.nome}
+                        </span>
+                        <span className="fixed-prize">🏆 {item.premio}</span>
+                        <button
+                          onClick={() => handleRemoveFixedWinner(realIndex)}
+                          className="trash-btn"
+                        >
+                          <FaTrash />
+                        </button>
+                      </li>
+                    );
+                  })}
+                  {winnersListFiltered.length === 0 && (
                     <p
                       style={{
                         color: "#999",
@@ -425,7 +594,7 @@ function Home() {
                         marginTop: "20px",
                       }}
                     >
-                      Nenhum vencedor fixo configurado.
+                      Nenhum vencedor nesta rodada.
                     </p>
                   )}
                 </ul>
@@ -443,7 +612,7 @@ function Home() {
             left: 0,
             width: "100%",
             height: "100%",
-            zIndex: 9999,
+            zIndex: 1,
             pointerEvents: "none",
           }}
         >
@@ -467,197 +636,229 @@ function Home() {
         }}
       >
         <main className="container">
-          <div className="top_bar">
-            <div className="sponsors-col left">
-              <div className="sponsor-box">
+          {/* TELA INTELIGENTE DO PROJETOR: Ocupa 100vh e centraliza os cards no espaço vazio */}
+          <div className="projection-view">
+            {/* CABEÇALHO */}
+            <div className="header-unified-wrapper">
+              <div className="sponsors-and-logo-row">
                 <img
                   src={currentSponsors[0]}
-                  className="sponsor-mini"
                   alt="Patrocinador"
+                  className="gn-sponsor-img"
                 />
-              </div>
-              <div className="sponsor-box">
                 <img
                   src={currentSponsors[1]}
-                  className="sponsor-mini"
                   alt="Patrocinador"
+                  className="gn-sponsor-img"
                 />
-              </div>
-            </div>
 
-            <div className="header">
-              {styleConfig.logo && (
-                <img
-                  src={`${styleConfig.logo}`}
-                  alt="Logo Principal"
-                  onClick={reset}
-                />
-              )}
-            </div>
+                {styleConfig.logo && (
+                  <img
+                    src={styleConfig.logo}
+                    alt="Logo Principal"
+                    className="gn-main-logo"
+                    onClick={reset}
+                  />
+                )}
 
-            <div className="sponsors-col right">
-              <div className="sponsor-box">
                 <img
                   src={currentSponsors[2]}
-                  className="sponsor-mini"
                   alt="Patrocinador"
+                  className="gn-sponsor-img"
                 />
-              </div>
-              <div className="sponsor-box">
                 <img
                   src={currentSponsors[3]}
-                  className="sponsor-mini"
                   alt="Patrocinador"
+                  className="gn-sponsor-img"
                 />
               </div>
             </div>
-          </div>
 
-          {loading ? (
-            <Spinner />
-          ) : drawer_n.length > 0 ? (
-            <div className="random-container">
-              <div className="random">
-                <ul className={drawer_n.length % 2 !== 0 ? "odd-items" : ""}>
-                  {drawer_n.map((itemTexto, i) => {
-                    const partes = itemTexto.split(" - ");
-                    const nomeCompleto = partes[0];
-                    const premio = partes[1] || "Sem prêmio";
-                    const nomeResumido = nomeCompleto
-                      .split(" ")
-                      .slice(0, 3)
-                      .join(" ");
-                    return (
-                      <div key={i} className="winner-wrapper">
-                        <div className="badge-rodada">{rodada}</div>
-                        <div className="prize-label">{premio}</div>
-
-                        {/* CARTÃO COM GATILHO DE DUPLO CLIQUE SECRETAMENTE INVISÍVEL */}
-                        <li
-                          className={`winner-card clickable-card ${redrawingIndex === i ? "redrawing-anim" : ""}`}
-                          onDoubleClick={() => handleRedrawSecret(i, itemTexto)}
-                          title="Duplo clique rápido para ressortear"
-                        >
-                          {redrawingIndex === i ? (
-                            <span className="winner-name-text redrawing-text">
-                              Ressorteando...
-                            </span>
-                          ) : (
-                            <span className="winner-name-text">
-                              {nomeResumido}
-                            </span>
-                          )}
-                        </li>
-                      </div>
-                    );
-                  })}
-                </ul>
-              </div>
-            </div>
-          ) : null}
-
-          <div className="info">
-            <h1 className="edition" style={{ color: styleConfig.color }}>
-              {styleConfig.title}
-            </h1>
-            <div className="form">
-              <input
-                id="qtd"
-                type="number"
-                min={1}
-                max={names.length}
-                value={quant}
-                onChange={(e) => setQuant(Number(e.target.value))}
-              />
-              <button
-                className="play_button2"
-                onClick={name_drawer}
-                disabled={loading}
+            {/* TÍTULO */}
+            <div className="edition-title-container">
+              <h2
+                className="edition-title-full"
+                style={{ color: styleConfig.color || "#ff5722" }}
               >
-                Sortear Nomes{" "}
-                <span>
-                  <FaPlay color="red" size={13} style={{ marginLeft: 5 }} />
-                </span>
-              </button>
+                {styleConfig.title}
+              </h2>
+            </div>
+
+            {/* ÁREA DOS GANHADORES: Flexível, se ajusta no meio do espaço disponível */}
+            <div className="gn-random-container">
+              <ul className="gn-winners-grid">
+                {loading
+                  ? spinners.map((spinName, i) => {
+                      // Pega os prêmios específicos da rodada atual
+                      const premiosDestaRodada =
+                        premiosPorRodada[rodada + 1] || [];
+                      const premioVisivel =
+                        premiosDestaRodada[i] || "Sorteando...";
+
+                      return (
+                        <div
+                          key={`spin-${i}`}
+                          className="gn-winner-card spinning-card"
+                        >
+                          <div className="floating-ribbon-gala">
+                            <div className="round-part-gala">
+                              Nº {rodada + 1}
+                            </div>
+                            <div className="prize-part-gala">
+                              {premioVisivel}
+                            </div>
+                          </div>
+                          <h2 className="gn-winner-name blurred">{spinName}</h2>
+                        </div>
+                      );
+                    })
+                  : drawer_n.length > 0
+                    ? drawer_n.map((itemTexto, i) => {
+                        const partes = itemTexto.split(" - ");
+                        const nomeCompleto = partes[0];
+                        const premio = partes[1] || "Sem prêmio";
+
+                        return (
+                          <div
+                            key={i}
+                            className={`gn-winner-card ${redrawingIndex === i ? "redrawing-anim" : ""}`}
+                            onDoubleClick={() =>
+                              handleRedrawSecret(i, itemTexto)
+                            }
+                            title="Duplo clique rápido para ressortear"
+                          >
+                            <div className="floating-ribbon-gala">
+                              <div className="round-part-gala">Nº {rodada}</div>
+                              <div className="prize-part-gala">{premio}</div>
+                            </div>
+                            <h2 className="gn-winner-name">
+                              {redrawingIndex === i
+                                ? "Ressorteando..."
+                                : nomeCompleto}
+                            </h2>
+                          </div>
+                        );
+                      })
+                    : null}
+              </ul>
             </div>
           </div>
+          {/* FIM DA TELA DO PROJETOR */}
 
-          <div className="form_areas_container">
-            <div className="input-group">
-              <div className="input-controls">
+          {/* BACKSTAGE ADMIN: Imediatamente abaixo da tela do projetor */}
+          <div className="admin-backstage">
+            <div className="gn-glass-panel">
+              <div className="gn-control-inputs">
+                <div className="gn-input-wrapper">
+                  <label>Sorteados</label>
+                  <div className="custom-number-input">
+                    <button
+                      type="button"
+                      className="qtd-btn"
+                      onClick={() => setQuant((q) => Math.max(1, q - 1))}
+                      disabled={loading || quant <= 1}
+                    >
+                      -
+                    </button>
+                    <input
+                      type="number"
+                      min={1}
+                      max={names.length}
+                      value={quant}
+                      onChange={(e) => setQuant(Number(e.target.value))}
+                      disabled={loading}
+                    />
+                    <button
+                      type="button"
+                      className="qtd-btn"
+                      onClick={() =>
+                        setQuant((q) => Math.min(names.length, q + 1))
+                      }
+                      disabled={loading || quant >= names.length}
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
                 <button
+                  className={`gn-btn-play ${loading ? "disabled" : ""}`}
+                  onClick={name_drawer}
+                  disabled={loading || names.length === 0}
+                >
+                  {loading ? "SORTEANDO..." : "SORTEAR AGORA"}
+                  {!loading && (
+                    <FaPlay size={14} style={{ marginLeft: "8px" }} />
+                  )}
+                </button>
+              </div>
+
+              <div className="gn-admin-buttons">
+                <button
+                  className={`gn-tab-btn ${isVisibleNames ? "active" : ""}`}
                   onClick={() => setIsVisibleNames(!isVisibleNames)}
                   title="Lista de Nomes"
                 >
-                  {isVisibleNames ? (
-                    <FaRegEye size={20} />
-                  ) : (
-                    <FaRegEyeSlash size={20} />
-                  )}
-                  <span style={{ marginLeft: 5, fontSize: 12 }}>
-                    Nomes ({names.length})
-                  </span>
+                  {isVisibleNames ? <FaRegEye /> : <FaRegEyeSlash />} Nomes (
+                  {names.length})
+                </button>
+                <button
+                  className={`gn-tab-btn ${isVisiblePrizes ? "active" : ""}`}
+                  onClick={() => setIsVisiblePrizes(!isVisiblePrizes)}
+                  title="Lista de Brindes"
+                >
+                  <FaGift /> Brindes ({listaBrindes.length})
+                </button>
+                <button className="gn-tab-btn">
+                  <Link
+                    to="/report"
+                    style={{ color: "inherit", textDecoration: "none" }}
+                  >
+                    Relatório
+                  </Link>
+                </button>
+                <button className="gn-tab-btn">
+                  <Link
+                    to="/style"
+                    style={{ color: "inherit", textDecoration: "none" }}
+                  >
+                    Estilo
+                  </Link>
                 </button>
               </div>
+            </div>
+
+            <div className="form_areas_container">
               <textarea
                 ref={textAreaRef}
-                className={`names_area ${isVisibleNames ? "visible" : "invisible"}`}
+                className={`gn-area ${isVisibleNames ? "show" : "hide"}`}
                 id="list"
                 placeholder="Cole a lista de NOMES aqui e aperte Enter..."
                 onLoad={getList}
                 onKeyDown={writeList}
               />
-            </div>
-
-            <div className="input-group">
-              <div className="input-controls">
-                <button
-                  onClick={() => setIsVisiblePrizes(!isVisiblePrizes)}
-                  title="Lista de Brindes"
-                >
-                  <FaGift
-                    size={20}
-                    color={isVisiblePrizes ? "#ffd700" : "white"}
-                  />
-                  <span style={{ marginLeft: 5, fontSize: 12 }}>
-                    Brindes ({listaBrindes.length})
-                  </span>
-                </button>
-              </div>
               <textarea
-                className={`names_area ${isVisiblePrizes ? "visible" : "invisible"}`}
+                className={`gn-area ${isVisiblePrizes ? "show" : "hide"}`}
                 value={textoBrindes}
                 onChange={handleBrindesChange}
-                placeholder="Cole a lista de BRINDES aqui... (salva automaticamente)"
-                style={{ borderColor: "#ffd700" }}
+                placeholder="Cole a lista de BRINDES aqui..."
               />
             </div>
-          </div>
 
-          <div className="buttons">
-            <button id="report_b">
-              <Link to="/report">Relatório</Link>
-            </button>
-            <button id="style_b">
-              <Link to="/style">Estilo</Link>
-            </button>
+            {participantesUltimoEvento.length > 0 && (
+              <div className="participacoes-gala">
+                <h3>
+                  Participantes Check-in: {participantesUltimoEvento.length}
+                </h3>
+                <ul>
+                  {participantesUltimoEvento.map((p) => (
+                    <li key={p.id}>
+                      {p.nome ? p.nome.toUpperCase() : "(sem nome)"}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-
-          {participantesUltimoEvento.length > 0 && (
-            <div className="participacoes">
-              <h3>
-                Participantes: {participantesUltimoEvento.length} participantes
-              </h3>
-              <br />
-              <ul>
-                {participantesUltimoEvento.map((p) => (
-                  <li key={p.id}>
-                    {p.nome ? p.nome.toUpperCase() : "(sem nome)"}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </main>
       </section>
     </>
