@@ -200,8 +200,14 @@ function Home() {
     try {
       const res = await axios.get(`${API_URL}/lista-brindes`);
       if (Array.isArray(res.data)) {
-        setListaBrindes(res.data);
-        setTextoBrindes(res.data.join("\n"));
+        // Filtra para o contador ignorar as linhas de rodada
+        const apenasPremios = res.data.filter((item) => {
+          const limpo = item.trim();
+          return !limpo.startsWith("-") && !limpo.startsWith("=");
+        });
+
+        setListaBrindes(apenasPremios); // Atualiza o contador perfeitamente
+        setTextoBrindes(res.data.join("\n")); // Mantém os separadores na caixa de texto
       }
     } catch (error) {
       console.error("Erro brindes:", error);
@@ -325,13 +331,25 @@ function Home() {
   const handleBrindesChange = (e) => {
     const texto = e.target.value;
     setTextoBrindes(texto);
-    const lista = texto.split("\n").filter((item) => item.trim() !== "");
-    setListaBrindes(lista);
+
+    // Lista completa que será enviada para a API (para não perdermos os separadores)
+    const listaCompleta = texto
+      .split("\n")
+      .filter((item) => item.trim() !== "");
+
+    // Filtra apenas para a contagem local da tela
+    const apenasPremios = listaCompleta.filter((item) => {
+      const limpo = item.trim();
+      return !limpo.startsWith("-") && !limpo.startsWith("=");
+    });
+
+    setListaBrindes(apenasPremios);
 
     if (saveBrindesTimeout.current) clearTimeout(saveBrindesTimeout.current);
     saveBrindesTimeout.current = setTimeout(async () => {
       try {
-        await axios.post(`${API_URL}/escrever-brindes`, lista);
+        // Envia a lista COMPLETA para o back-end
+        await axios.post(`${API_URL}/escrever-brindes`, listaCompleta);
       } catch (error) {
         console.error("Erro ao salvar brindes:", error);
       }
